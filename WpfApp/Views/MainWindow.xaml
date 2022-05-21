@@ -1,0 +1,158 @@
+﻿<Window x:Class="WpfApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp.Views"
+        xmlns:localU="clr-namespace:Utils"
+        xmlns:localVM="clr-namespace:WpfApp.ViewModels"
+        mc:Ignorable="d"
+        Height="600" Width="578" Title="{Binding Path=Title}" ResizeMode="NoResize">
+
+    <Window.DataContext>
+        <localVM:Board />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- 座標変換用の行サイズを指定する。モデルと一致させること。 -->
+        <localU:PositionConverter x:Key="PositionConverter" RowSize="8" />
+
+        <!-- ホバー位置半透明化ボタン -->
+        <SolidColorBrush x:Key="NormalButtonBrush" Color="#ff000000" />
+        <SolidColorBrush x:Key="NormalBackgroundBrush" Color="Transparent" />
+        <SolidColorBrush x:Key="HoverButtonBrush" Color="#ffffffff" />
+        <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#66ffffff" />
+        <Style x:Key="GridButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Name="HoverButtonBorder" BorderThickness="1" BorderBrush="{StaticResource NormalButtonBrush}" Background="{StaticResource NormalBackgroundBrush}" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverButtonBorder" Property="BorderBrush" Value="{StaticResource HoverButtonBrush}" />
+                                <Setter TargetName="HoverButtonBorder" Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HoverButtonBorder" Property="Background" Value="{StaticResource NormalBackgroundBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24" />
+            <RowDefinition Height="514" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="24" />
+            <ColumnDefinition Width="514" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+            <Label Width="64" Content="a" Margin="24,-2,0,0" />
+            <Label Width="64" Content="b" Margin="0,-2,0,0" />
+            <Label Width="64" Content="c" Margin="0,-2,0,0" />
+            <Label Width="64" Content="d" Margin="0,-2,0,0" />
+            <Label Width="64" Content="e" Margin="0,-2,0,0" />
+            <Label Width="64" Content="f" Margin="0,-2,0,0" />
+            <Label Width="64" Content="g" Margin="0,-2,0,0" />
+            <Label Width="64" Content="h" Margin="0,-2,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <Label Height="64" Content="1" HorizontalAlignment="Center" Margin="0,20,0,0" />
+            <Label Height="64" Content="2" HorizontalAlignment="Center" />
+            <Label Height="64" Content="3" HorizontalAlignment="Center" />
+            <Label Height="64" Content="4" HorizontalAlignment="Center" />
+            <Label Height="64" Content="5" HorizontalAlignment="Center" />
+            <Label Height="64" Content="6" HorizontalAlignment="Center" />
+            <Label Height="64" Content="7" HorizontalAlignment="Center" />
+            <Label Height="64" Content="8" HorizontalAlignment="Center" />
+        </StackPanel>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="1">
+            <ItemsControl ItemsSource="{Binding Path=Data}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid ShowGridLines="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style>
+                        <Setter Property="Grid.Column" Value="{Binding Path=ColumnIndex}" />
+                        <Setter Property="Grid.Row" Value="{Binding Path=RowIndex}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Rectangle Fill="{Binding Path=BackColor}" />
+                            <Ellipse Margin="5" Fill="{Binding Path=Color}" />
+                            <Ellipse Margin="26" Fill="{Binding Path=LastColor}" />
+                            <TextBlock Margin="4,0,4,0" Foreground="{Binding Path=[0]}" Text="{Binding Path=[1]}" />
+                            <TextBlock Margin="4,15,4,0" Foreground="{Binding Path=[2]}" Text="{Binding Path=[3]}" />
+                            <TextBlock Margin="4,30,4,0" Foreground="{Binding Path=[4]}" Text="{Binding Path=[5]}" />
+                            <TextBlock Margin="4,45,4,0" Foreground="{Binding Path=[6]}" Text="{Binding Path=[7]}" />
+                            <Button Command="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.SelectCommand}" Style="{StaticResource GridButtonStyle}">
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource PositionConverter}">
+                                        <Binding Path="ColumnIndex" />
+                                        <Binding Path="RowIndex" />
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="開始" Command="{Binding Path=StartCommand}" />
+                    <Separator />
+                    <MenuItem Header="設定" Command="{Binding Path=CtrlCommand}"
+                    localU:DialogBehavior.Title="設定"
+                    localU:DialogBehavior.Content="{Binding Path=CtrlViewModel}">
+                        <localU:DialogBehavior.Template>
+                            <DataTemplate>
+                                <local:CtrlView />
+                            </DataTemplate>
+                        </localU:DialogBehavior.Template>
+                    </MenuItem>
+                    <MenuItem Header="情報" Command="{Binding Path=InfoCommand}"
+                    localU:DialogBehavior.Title="情報"
+                    localU:DialogBehavior.Content="{Binding Path=InfoViewModel}">
+                        <localU:DialogBehavior.Template>
+                            <DataTemplate>
+                                <local:InfoView />
+                            </DataTemplate>
+                        </localU:DialogBehavior.Template>
+                    </MenuItem>
+                </ContextMenu>
+            </Border.ContextMenu>
+        </Border>
+    </Grid>
+
+</Window>

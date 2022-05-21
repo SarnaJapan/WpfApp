@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="WpfApp.Views.InfoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:WpfApp.Views"
+             mc:Ignorable="d"
+             Height="120" Width="240">
+
+    <StackPanel>
+        <Label Margin="4,8,4,0" Content="WPF Othello for .NET Framework 4.6.1" HorizontalAlignment="Center" />
+        <Label Margin="4,0,4,8" Content="Version 1.0.0" HorizontalAlignment="Center" />
+        <Button Margin="4,8,4,8" Width="66" Height="26" Content="OK" Command="{Binding CloseCommand}" />
+    </StackPanel>
+
+</UserControl>
