@@ -57,7 +57,7 @@ namespace Utils
         /// <returns></returns>
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            if (!Directory.Exists(value.ToString()))
+            if (!Directory.Exists((string)value))
             {
                 return new ValidationResult(false, "Invalid path.");
             }

@@ -10,8 +10,8 @@ namespace WpfLibPlayerV1
     /// 置石可能位置をランダムで返す。評価選択肢対象外。
     public class PlayerRandV1 : IOthelloPlayerV1
     {
-        public string Name => "ランダム";
-        public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 1, Common.OPTION_NOEVAL);
+        public string Name { get; set; } = "ランダム";
+        public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 0, Common.OPTION_NOEVAL);
         public int Calc(int color, int[] data) => ToolsV1.GetRand(color, data);
         public double[] Score(int color, int[] data) => null;
     }
@@ -22,7 +22,7 @@ namespace WpfLibPlayerV1
     /// 最大取得数となる置石位置を計算。
     public class PlayerMaxCountV1 : IOthelloPlayerV1
     {
-        public string Name => "最大取得数";
+        public string Name { get; set; } = "最大取得数";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 0, "");
         public int Calc(int color, int[] data)
         {
@@ -55,7 +55,7 @@ namespace WpfLibPlayerV1
     /// 最小開放度となる置石位置を計算。
     public class PlayerMinOpenV1 : IOthelloPlayerV1
     {
-        public string Name => "最小開放度";
+        public string Name { get; set; } = "最小開放度";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 0, "");
         public int Calc(int color, int[] data)
         {
@@ -91,7 +91,7 @@ namespace WpfLibPlayerV1
     /// 原始モンテカルロ法で置石位置を計算。
     public class PlayerMCV1 : IOthelloPlayerV1
     {
-        public string Name => "モンテカルロ";
+        public string Name { get; set; } = "モンテカルロ";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 0, "");
         public int Calc(int color, int[] data)
         {
@@ -99,9 +99,9 @@ namespace WpfLibPlayerV1
             var r = d.Where(n => !double.IsNaN(n));
             return r.Any() ? System.Array.IndexOf(d, r.Max()) : -1;
         }
-        public double[] Score(int color, int[] data) => ToolsV1MC.Compute(color, data, Count);
+        public double[] Score(int color, int[] data) => ToolsMCV1.Compute(color, data, Count);
 
-        public int Count { get; set; } = ToolsV1MC.DEFAULT_COUNT;
+        public int Count { get; set; } = ToolsMCV1.DEFAULT_COUNT;
     }
 
 }

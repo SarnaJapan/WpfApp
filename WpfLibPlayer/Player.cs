@@ -10,8 +10,8 @@ namespace WpfLibPlayer
     /// 置石可能位置をランダムで返す。評価選択肢対象外。
     public class PlayerRand : IOthelloPlayer
     {
-        public string Name => "ランダム";
-        public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, Common.OPTION_NOEVAL);
+        public string Name { get; set; } = "ランダム";
+        public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, Common.OPTION_NOEVAL);
         public ulong Calc(ulong p, ulong o) => Tools.GetRand(p, o);
         public double[] Score(ulong p, ulong o) => null;
     }
@@ -22,7 +22,7 @@ namespace WpfLibPlayer
     /// 最大取得数となる置石位置を計算。
     public class PlayerMaxCount : IOthelloPlayer
     {
-        public string Name => "最大取得数";
+        public string Name { get; set; } = "最大取得数";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -62,7 +62,7 @@ namespace WpfLibPlayer
     /// 最小開放度となる置石位置を計算。
     public class PlayerMinOpen : IOthelloPlayer
     {
-        public string Name => "最小開放度";
+        public string Name { get; set; } = "最小開放度";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -103,7 +103,7 @@ namespace WpfLibPlayer
     /// 原始モンテカルロ法で置石位置を計算。
     public class PlayerMC : IOthelloPlayer
     {
-        public string Name => "モンテカルロ";
+        public string Name { get; set; } = "モンテカルロ";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -122,7 +122,7 @@ namespace WpfLibPlayer
     /// モンテカルロ木探索法で置石位置を計算。
     public class PlayerMCTS : IOthelloPlayer
     {
-        public string Name => "モンテカルロ木探索";
+        public string Name { get; set; } = "モンテカルロ木探索";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
         public ulong Calc(ulong p, ulong o)
         {

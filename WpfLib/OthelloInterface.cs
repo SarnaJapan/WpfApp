@@ -8,7 +8,7 @@
         /// <summary>
         /// 名称
         /// </summary>
-        string Name { get; }
+        string Name { get; set; }
 
         /// <summary>
         /// バージョン
@@ -40,7 +40,7 @@
         /// <summary>
         /// 名称
         /// </summary>
-        string Name { get; }
+        string Name { get; set; }
 
         /// <summary>
         /// バージョン

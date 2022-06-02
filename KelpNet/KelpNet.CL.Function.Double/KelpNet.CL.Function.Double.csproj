@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461</TargetFrameworks>
+    <RootNamespace>KelpNet.CL</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;DOUBLE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DOUBLE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Common\Functions\Interface\.gitignore" />
+    <None Remove="Functions\Connections\.gitignore" />
+    <None Remove="Functions\Noise\.gitignore" />
+    <None Remove="Functions\Poolings\.gitignore" />
+    <None Remove="KelpNet.CL.Function.Double.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\KelpNet.CL.Function\Common\Functions\Interface\ICompressibleActivation.cs" Link="Common\Functions\Interface\ICompressibleActivation.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Connections\Convolution2D.cs" Link="Functions\Connections\Convolution2D.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Connections\Deconvolution2D.cs" Link="Functions\Connections\Deconvolution2D.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Connections\Linear.cs" Link="Functions\Connections\Linear.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Connections\MaskedLinear.cs" Link="Functions\Connections\MaskedLinear.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Noise\Dropout.cs" Link="Functions\Noise\Dropout.cs" />
+    <Compile Include="..\KelpNet.CL.Function\Functions\Poolings\MaxPooling2D.cs" Link="Functions\Poolings\MaxPooling2D.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Functions\Interface\" />
+    <Folder Include="Functions\Noise\" />
+    <Folder Include="Functions\Poolings\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KelpNet.CL.Common\KelpNet.CL.Common.csproj" />
+    <ProjectReference Include="..\KelpNet.Common\KelpNet.Common.csproj" />
+  </ItemGroup>
+
+</Project>

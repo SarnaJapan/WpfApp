@@ -23,9 +23,14 @@ namespace WpfApp.Models
                 new PlayerMaxCount(),
                 new PlayerMinOpen(),
                 new PlayerMC(),
-
                 new PlayerMCTS(),
-                new PlayerDBN(),
+                new PlayerAccord(),
+                new PlayerKelp(),
+
+                new PlayerKelp() { Name="Kelp 00", Param=0 },
+                new PlayerKelp() { Name="Kelp 01", Param=1 },
+                new PlayerKelp() { Name="Kelp 02", Param=2 },
+                new PlayerKelp() { Name="Kelp 03", Param=3 },
             };
         }
     }
@@ -36,7 +41,7 @@ namespace WpfApp.Models
     /// 常に計算不可を返す。対戦選択肢対象外。
     internal class PlayerNull : IOthelloPlayer
     {
-        public string Name => "（なし）";
+        public string Name { get; set; } = "（なし）";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, Common.OPTION_NOMATCH);
         public ulong Calc(ulong p, ulong o) => 0;
         public double[] Score(ulong p, ulong o) => null;
@@ -48,7 +53,7 @@ namespace WpfApp.Models
     /// 置石可能位置をランダムで返す。評価選択肢対象外。
     internal class PlayerRand : IOthelloPlayer
     {
-        public string Name => "ランダム";
+        public string Name { get; set; } = "ランダム";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, Common.OPTION_NOEVAL);
         public ulong Calc(ulong p, ulong o) => Tools.GetRand(p, o);
         public double[] Score(ulong p, ulong o) => null;
@@ -60,7 +65,7 @@ namespace WpfApp.Models
     /// 最大取得数となる置石位置を計算。
     internal class PlayerMaxCount : IOthelloPlayer
     {
-        public string Name => "最大取得数";
+        public string Name { get; set; } = "最大取得数";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -100,7 +105,7 @@ namespace WpfApp.Models
     /// 最小開放度となる置石位置を計算。
     internal class PlayerMinOpen : IOthelloPlayer
     {
-        public string Name => "最小開放度";
+        public string Name { get; set; } = "最小開放度";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -141,7 +146,7 @@ namespace WpfApp.Models
     /// 原始モンテカルロ法で置石位置を計算。
     internal class PlayerMC : IOthelloPlayer
     {
-        public string Name => "モンテカルロ";
+        public string Name { get; set; } = "モンテカルロ";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -160,7 +165,7 @@ namespace WpfApp.Models
     /// モンテカルロ木探索法で置石位置を計算。
     internal class PlayerMCTS : IOthelloPlayer
     {
-        public string Name => "モンテカルロ木探索";
+        public string Name { get; set; } = "モンテカルロ木探索";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 1, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -175,12 +180,12 @@ namespace WpfApp.Models
     }
 
     /// <summary>
-    /// Policy Network戦略プレイヤー
+    /// Accord DBN戦略プレイヤー
     /// </summary>
-    /// Policy Networkで置石位置を計算。
-    internal class PlayerDBN : IOthelloPlayer
+    /// Accord DBNで置石位置を計算。
+    internal class PlayerAccord : IOthelloPlayer
     {
-        public string Name => "Policy Network";
+        public string Name { get; set; } = "Accord DBN";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
         public ulong Calc(ulong p, ulong o)
         {
@@ -197,7 +202,35 @@ namespace WpfApp.Models
             var r = d.Where(n => !double.IsNaN(n));
             return (r.Count() == 0) ? 0 : Tools.Pos2Bit(System.Array.IndexOf(d, r.Max()));
         }
-        public double[] Score(ulong p, ulong o) => ToolsMLAccord.ComputeDBN(p, o);
+        public double[] Score(ulong p, ulong o) => ToolsMLAccord.Compute(p, o);
+    }
+
+    /// <summary>
+    /// Kelp MLP戦略プレイヤー
+    /// </summary>
+    /// Kelp MLPで置石位置を計算。
+    internal class PlayerKelp : IOthelloPlayer
+    {
+        public string Name { get; set; } = "Kelp MLP";
+        public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
+        public ulong Calc(ulong p, ulong o)
+        {
+            // Scoreは盤面全体が対象のため合法手抽出が必要
+            var d = Score(p, o);
+            var lm = Tools.LegalMove(p, o);
+            for (int i = 0; i < 64; i++)
+            {
+                if ((lm & Tools.Pos2Bit(i)) == 0)
+                {
+                    d[i] = double.NaN;
+                }
+            }
+            var r = d.Where(n => !double.IsNaN(n));
+            return (r.Count() == 0) ? 0 : Tools.Pos2Bit(System.Array.IndexOf(d, r.Max()));
+        }
+        public double[] Score(ulong p, ulong o) => ToolsMLKelp.Compute(p, o, Param);
+
+        public int Param { get; set; } = 0;
     }
 
 }

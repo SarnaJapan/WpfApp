@@ -11,6 +11,8 @@ namespace WpfApp.Models
     /// </summary>
     internal static class Common
     {
+        #region 個別
+
         /// <summary>
         /// 盤サイズ
         /// </summary>
@@ -79,14 +81,15 @@ namespace WpfApp.Models
         public const string TEST_CONVERT = "棋譜変換(->log_wt)";
         public const string TEST_CHECK = "棋譜確認(->log_ok)";
         public const string TEST_SEARCH = "MCTSパラメータ探索";
-        public const string TEST_LEARN_NW = "Learn Network";
-        public const string TEST_REINFORCE = "Reinforce";
-        public const string TEST_CLEAR_DS = "Clear DataSet";
-        public const string TEST_CLEAR_NW = "Clear Network";
-        public const string TEST_LEARN_NW_KELP = "Learn Network (Kelp)";
+        public const string TEST_TRAIN_NW = "Train Network (Accord)";
+        public const string TEST_REINFORCE = "Reinforce (Accord)";
+        public const string TEST_TRAIN_NW_KELP = "Train Network (Kelp)";
         public const string TEST_REINFORCE_KELP = "Reinforce (Kelp)";
-        public const string TEST_CLEAR_DS_KELP = "Clear DataSet (Kelp)";
-        public const string TEST_CLEAR_NW_KELP = "Clear Network (Kelp)";
+
+        public const string TEST_TRAIN_NW_KELP0 = "Train Network 00 (Kelp)";
+        public const string TEST_TRAIN_NW_KELP1 = "Train Network 01 (Kelp)";
+        public const string TEST_TRAIN_NW_KELP2 = "Train Network 02 (Kelp)";
+        public const string TEST_TRAIN_NW_KELP3 = "Train Network 03 (Kelp)";
         //@}
 
         /// <summary>
@@ -96,16 +99,17 @@ namespace WpfApp.Models
         /// <param name="token"></param>
         /// <param name="param"></param>
         /// <returns>処理時間</returns>
-        public static string TestCommandBase(System.IProgress<string> progress, CancellationToken token, string param)
+        public static string TestCommandBase(System.IProgress<string> progress, CancellationToken token, object[] param)
         {
+            // パラメータ確認
             int timeout;
             try
             {
-                timeout = int.Parse(param);
+                timeout = int.Parse((string)param[0]);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
-                return ex.Message;
+                return "Invalid parameter.";
             }
 
             var sw = new System.Diagnostics.Stopwatch();
@@ -140,7 +144,9 @@ namespace WpfApp.Models
             return $"{sw.ElapsedMilliseconds} ms";
         }
 
-        #region 共通
+        #endregion
+
+        #region 汎用
 
         /// <summary>
         /// ログディレクトリ

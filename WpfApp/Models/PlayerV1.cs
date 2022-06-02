@@ -33,7 +33,7 @@ namespace WpfApp.Models
     /// 常に計算不可を返す。対戦選択肢対象外。
     internal class PlayerNullV1 : IOthelloPlayerV1
     {
-        public string Name => "（なし）";
+        public string Name { get; set; } = "（なし）";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 0, Common.OPTION_NOMATCH);
         public int Calc(int color, int[] data) => -1;
         public double[] Score(int color, int[] data) => null;
@@ -45,7 +45,7 @@ namespace WpfApp.Models
     /// 置石可能位置をランダムで返す。評価選択肢対象外。
     internal class PlayerRandV1 : IOthelloPlayerV1
     {
-        public string Name => "ランダム";
+        public string Name { get; set; } = "ランダム";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 1, Common.OPTION_NOEVAL);
         public int Calc(int color, int[] data) => ToolsV1.GetRand(color, data);
         public double[] Score(int color, int[] data) => null;
@@ -57,7 +57,7 @@ namespace WpfApp.Models
     /// 最大取得数となる置石位置を計算。
     internal class PlayerMaxCountV1 : IOthelloPlayerV1
     {
-        public string Name => "最大取得数";
+        public string Name { get; set; } = "最大取得数";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 1, "");
         public int Calc(int color, int[] data)
         {
@@ -90,7 +90,7 @@ namespace WpfApp.Models
     /// 最小開放度となる置石位置を計算。
     internal class PlayerMinOpenV1 : IOthelloPlayerV1
     {
-        public string Name => "最小開放度";
+        public string Name { get; set; } = "最小開放度";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 1, "");
         public int Calc(int color, int[] data)
         {
@@ -126,7 +126,7 @@ namespace WpfApp.Models
     /// 原始モンテカルロ法で置石位置を計算。
     internal class PlayerMCV1 : IOthelloPlayerV1
     {
-        public string Name => "モンテカルロ";
+        public string Name { get; set; } = "モンテカルロ";
         public string Version => string.Format(Common.VERSION_FORMAT, 1, 0, 1, "");
         public int Calc(int color, int[] data)
         {
@@ -134,9 +134,9 @@ namespace WpfApp.Models
             var r = d.Where(n => !double.IsNaN(n));
             return r.Any() ? System.Array.IndexOf(d, r.Max()) : -1;
         }
-        public double[] Score(int color, int[] data) => ToolsV1MC.Compute(color, data, Count);
+        public double[] Score(int color, int[] data) => ToolsMCV1.Compute(color, data, Count);
 
-        public int Count { get; set; } = ToolsV1MC.DEFAULT_COUNT;
+        public int Count { get; set; } = ToolsMCV1.DEFAULT_COUNT;
     }
 
 }

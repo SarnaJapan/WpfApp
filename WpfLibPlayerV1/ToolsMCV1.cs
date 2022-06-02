@@ -6,12 +6,12 @@ namespace WpfLibPlayerV1
     /// <summary>
     /// モンテカルロ関連処理
     /// </summary>
-    internal static class ToolsV1MC
+    internal static class ToolsMCV1
     {
         /// <summary>
         /// デフォルトプレイアウト回数
         /// </summary>
-        public static int DEFAULT_COUNT = 64;
+        public static int DEFAULT_COUNT = 1024;
 
         #region 原始モンテカルロ
 

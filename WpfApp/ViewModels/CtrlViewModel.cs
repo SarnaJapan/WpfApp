@@ -310,8 +310,10 @@ namespace WpfApp.ViewModels
         /// </summary>
         public string[] TestList { get; } = new string[] {
             Common.TEST_CREATE, Common.TEST_CONVERT, Common.TEST_CHECK, Common.TEST_SEARCH,
-            Common.TEST_LEARN_NW, Common.TEST_REINFORCE, Common.TEST_CLEAR_DS, Common.TEST_CLEAR_NW,
-            Common.TEST_LEARN_NW_KELP, Common.TEST_REINFORCE_KELP, Common.TEST_CLEAR_DS_KELP, Common.TEST_CLEAR_NW_KELP,
+            Common.TEST_TRAIN_NW, Common.TEST_REINFORCE,
+            /// Common.TEST_TRAIN_NW_KELP, Common.TEST_REINFORCE_KELP,
+            /// @todo 実験用のため修正予定
+            Common.TEST_TRAIN_NW_KELP0, Common.TEST_TRAIN_NW_KELP1, Common.TEST_TRAIN_NW_KELP2, Common.TEST_TRAIN_NW_KELP3,
         };
 
         /// <summary>
@@ -335,8 +337,8 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// ログディレクトリ
         /// </summary>
-        // public string LogDir { get; set; } = Common.GetAppPath(Common.LOG_DIR);
-        /// @todo 実験環境用のため修正
+        /// public string LogDir { get; set; } = Common.GetAppPath(Common.LOG_DIR);
+        /// @todo 実験用のため修正予定
         public string LogDir { get; set; } = @"D:\Prog\doc\WpfApp\log";
 
         #endregion
@@ -425,7 +427,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         /// <param name="func">処理</param>
         /// <param name="param">パラメータ</param>
-        private async void AsyncCall(System.Func<System.IProgress<string>, CancellationToken, string, string> func, string param)
+        private async void AsyncCall(System.Func<System.IProgress<string>, CancellationToken, object[], string> func, object[] param)
         {
             IsBusy = true;
             CancelTokenSource = new CancellationTokenSource();
@@ -512,38 +514,40 @@ namespace WpfApp.ViewModels
                         AsyncCall(ToolsKF.CreateLog, MatchPB, MatchPW, MatchCount, LogDir);
                         break;
                     case Common.TEST_CONVERT:
-                        AsyncCall(ToolsKF.ConvertLog, LogDir);
+                        AsyncCall(ToolsKF.ConvertLog, new object[] { LogDir });
                         break;
                     case Common.TEST_CHECK:
-                        AsyncCall(ToolsKF.CheckLog, LogDir);
+                        AsyncCall(ToolsKF.CheckLog, new object[] { LogDir });
                         break;
                     case Common.TEST_SEARCH:
-                        AsyncCall(ToolsMC.SearchParam, LogDir);
+                        AsyncCall(ToolsMC.SearchParam, new object[] { LogDir });
                         break;
-                    case Common.TEST_LEARN_NW:
-                        AsyncCall(ToolsMLAccord.LearnNetwork, LogDir);
+                    case Common.TEST_TRAIN_NW:
+                        AsyncCall(ToolsMLAccord.TrainNetwork, new object[] { LogDir, 0 });
                         break;
                     case Common.TEST_REINFORCE:
-                        AsyncCall(ToolsMLAccord.ReinforceNetwork, LogDir);
+                        AsyncCall(ToolsMLAccord.ReinforceNetwork, new object[] { LogDir });
                         break;
-                    case Common.TEST_CLEAR_DS:
-                        AsyncCall(ToolsMLAccord.ClearDataSet);
-                        break;
-                    case Common.TEST_CLEAR_NW:
-                        AsyncCall(ToolsMLAccord.ClearNetwork);
-                        break;
-                    case Common.TEST_LEARN_NW_KELP:
-                        AsyncCall(ToolsMLKelp.LearnNetwork, LogDir);
+                    case Common.TEST_TRAIN_NW_KELP:
+                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 0 });
                         break;
                     case Common.TEST_REINFORCE_KELP:
-                        AsyncCall(ToolsMLKelp.ReinforceNetwork, LogDir);
+                        AsyncCall(ToolsMLKelp.ReinforceNetwork, new object[] { LogDir });
                         break;
-                    case Common.TEST_CLEAR_DS_KELP:
-                        AsyncCall(ToolsMLKelp.ClearDataSet);
+                    /// @todo 実験用のため修正予定
+                    case Common.TEST_TRAIN_NW_KELP0:
+                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 0 });
                         break;
-                    case Common.TEST_CLEAR_NW_KELP:
-                        AsyncCall(ToolsMLKelp.ClearNetwork);
+                    case Common.TEST_TRAIN_NW_KELP1:
+                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 1 });
                         break;
+                    case Common.TEST_TRAIN_NW_KELP2:
+                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 2 });
+                        break;
+                    case Common.TEST_TRAIN_NW_KELP3:
+                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 3 });
+                        break;
+                    /// @todo 実験用のため修正予定
                     default:
                         AsyncCall(Common.TestCommand);
                         break;
@@ -552,7 +556,7 @@ namespace WpfApp.ViewModels
             else
             {
                 // パラメーラ指定あり
-                AsyncCall(Common.TestCommandBase, param.ToString() ?? "");
+                AsyncCall(Common.TestCommandBase, new object[] { param });
             }
         },
         _ =>
