@@ -61,8 +61,12 @@ namespace WpfApp.Models
         /// </summary>
         public Master()
         {
+            var playerlist = new List<IOthelloPlayer>() { new PlayerNull(), new PlayerRand(), new PlayerMaxCount(), new PlayerMinOpen(),
+                new PlayerMC(), new PlayerMCTS(), new PlayerAccord(), new PlayerKelp(),
+                new PlayerKelp() { Name = "Kelp 00", Param = 0 }, new PlayerKelp() { Name = "Kelp 01", Param = 1 },
+                new PlayerKelp() { Name = "Kelp 02", Param = 2 }, new PlayerKelp() { Name = "Kelp 03", Param = 3 }, };
             // デフォルトプレイヤー登録
-            foreach (var item in Player.GetPlayerList())
+            foreach (var item in playerlist)
             {
                 PlayerMap.Add(item.Name, item);
             }

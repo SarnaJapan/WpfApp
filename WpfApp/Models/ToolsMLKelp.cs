@@ -1,4 +1,4 @@
-﻿using KelpNet.CPU;
+﻿using KelpNet.CL;
 
 using System.Collections.Generic;
 using System.IO;
@@ -110,7 +110,7 @@ namespace WpfApp.Models
         /// <typeparam name="T"></typeparam>
         /// <param name="type">使用ネットワーク番号</param>
         /// <returns>ネットワーク</returns>
-        private static FunctionStack<Real> LoadNetwork(int type)
+        private static FunctionStack<Real> LoadNetworkMLP(int type)
         {
             if (NN[type] == null)
             {
@@ -149,6 +149,36 @@ namespace WpfApp.Models
                         new Linear<Real>(N, 64, name: "l8 Linear"),
                         new KelpNet.BatchNormalization<Real>(N, name: "l8 BatchNorm"),
                         new ReLU<Real>(name: "l8 ReLU")
+                    );
+                    System.Diagnostics.Debug.WriteLine("-> Create " + GetNetworkInfo(type));
+                }
+            }
+            return NN[type];
+        }
+
+        private static FunctionStack<Real> LoadNetwork(int type)
+        {
+            if (NN[type] == null)
+            {
+                if (File.Exists(FILE_NN[type]))
+                {
+                    NN[type] = (FunctionStack<Real>)ModelIO<Real>.Load(FILE_NN[type]);
+                    System.Diagnostics.Debug.WriteLine("-> Load " + GetNetworkInfo(type));
+                }
+                if (NN[type] == null)
+                {
+                    // 2層CNN構成
+                    NN[type] = new FunctionStack<Real>(
+                        new Convolution2D<Real>(2, 64, 5, pad: 2, name: "l1 Conv2D", gpuEnable: true),
+                        new ReLU<Real>(name: "l1 ReLU"),
+                        new MaxPooling2D<Real>(2, 2, name: "l1 MaxPooling", gpuEnable: true),
+                        new Convolution2D<Real>(64, 64, 5, pad: 2, name: "l2 Conv2D", gpuEnable: true),
+                        new ReLU<Real>(name: "l2 ReLU"),
+                        new MaxPooling2D<Real>(2, 2, name: "l2 MaxPooling", gpuEnable: true),
+                        new Linear<Real>(2 * 64, 256, name: "l3 Linear", gpuEnable: true),
+                        new ReLU<Real>(name: "l3 ReLU"),
+                        new Dropout<Real>(name: "l3 DropOut"),
+                        new Linear<Real>(256, 64, name: "l4 Linear", gpuEnable: true)
                     );
                     System.Diagnostics.Debug.WriteLine("-> Create " + GetNetworkInfo(type));
                 }

@@ -1,40 +1,9 @@
 ﻿using OthelloInterface;
 
-using System.Collections.Generic;
 using System.Linq;
 
 namespace WpfApp.Models
 {
-    /// <summary>
-    /// デフォルトプレイヤー関連処理
-    /// </summary>
-    internal static class Player
-    {
-        /// <summary>
-        /// デフォルトプレイヤーリスト取得
-        /// </summary>
-        /// <returns>新規デフォルトプレイヤーリスト</returns>
-        public static List<IOthelloPlayer> GetPlayerList()
-        {
-            return new List<IOthelloPlayer>
-            {
-                new PlayerNull(),
-                new PlayerRand(),
-                new PlayerMaxCount(),
-                new PlayerMinOpen(),
-                new PlayerMC(),
-                new PlayerMCTS(),
-                new PlayerAccord(),
-                new PlayerKelp(),
-
-                new PlayerKelp() { Name="Kelp 00", Param=0 },
-                new PlayerKelp() { Name="Kelp 01", Param=1 },
-                new PlayerKelp() { Name="Kelp 02", Param=2 },
-                new PlayerKelp() { Name="Kelp 03", Param=3 },
-            };
-        }
-    }
-
     /// <summary>
     /// 対人戦略プレイヤー
     /// </summary>

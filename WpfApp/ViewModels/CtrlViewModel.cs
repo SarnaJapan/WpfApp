@@ -56,28 +56,12 @@ namespace WpfApp.ViewModels
             // 旧版（ゲームマスターに登録済みのプレイヤーリストを取得）
             MatchMapV1 = Master.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
             // BitBoard版（メイン処理の版数と異なるため新規プレイヤーリストを取得）
-            var map = new Dictionary<string, IOthelloPlayer>();
-            foreach (var item in Player.GetPlayerList())
-            {
-                map.Add(item.Name, item);
-            }
-            foreach (var item in Common.GetPluginList<IOthelloPlayer>())
-            {
-                map.Add(item.Name + Common.PLUGIN_SUF, item);
-            }
-            MatchMap = map.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            var gm = new Master();
+            MatchMap = gm.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
 #else
             // 旧版（メイン処理の版数と異なるため新規プレイヤーリストを取得）
-            var mapv1 = new Dictionary<string, IOthelloPlayerV1>();
-            foreach (var item in PlayerV1.GetPlayerList())
-            {
-                mapv1.Add(item.Name, item);
-            }
-            foreach (var item in Common.GetPluginList<IOthelloPlayerV1>())
-            {
-                mapv1.Add(item.Name + Common.PLUGIN_SUF, item);
-            }
-            MatchMapV1 = mapv1.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            var gmv1 = new MasterV1();
+            MatchMapV1 = gmv1.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
             // BitBoard版（ゲームマスターに登録済みのプレイヤーリストを取得）
             MatchMap = Master.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
 #endif
@@ -311,7 +295,7 @@ namespace WpfApp.ViewModels
         public string[] TestList { get; } = new string[] {
             Common.TEST_CREATE, Common.TEST_CONVERT, Common.TEST_CHECK, Common.TEST_SEARCH,
             Common.TEST_TRAIN_NW, Common.TEST_REINFORCE,
-            /// Common.TEST_TRAIN_NW_KELP, Common.TEST_REINFORCE_KELP,
+            Common.TEST_TRAIN_NW_KELP, Common.TEST_REINFORCE_KELP,
             /// @todo 実験用のため修正予定
             Common.TEST_TRAIN_NW_KELP0, Common.TEST_TRAIN_NW_KELP1, Common.TEST_TRAIN_NW_KELP2, Common.TEST_TRAIN_NW_KELP3,
         };
