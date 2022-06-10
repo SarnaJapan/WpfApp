@@ -10,7 +10,7 @@ using System.Threading;
 namespace WpfApp.Models
 {
     /// <summary>
-    /// 機械学習関連処理(Accord.Net)
+    /// 機械学習処理スタティッククラス(Accord.Net)
     /// </summary>
     internal static class ToolsMLAccord
     {

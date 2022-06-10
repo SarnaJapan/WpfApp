@@ -565,8 +565,9 @@ namespace WpfApp.Models
     }
 
     /// <summary>
-    /// データ
+    /// 対局情報
     /// </summary>
+    /// １対局の棋譜と最終石差を格納
     internal class KFData
     {
         /// <summary>
@@ -593,8 +594,9 @@ namespace WpfApp.Models
     }
 
     /// <summary>
-    /// データローダ
+    /// 対局情報ローダ
     /// </summary>
+    /// 棋譜ファイルを読み込み @ref KFData のリストに格納
     internal class KFDataLoader
     {
         /// <summary>
@@ -603,9 +605,30 @@ namespace WpfApp.Models
         public List<KFData> KFList { get; } = new List<KFData>();
 
         /// <summary>
+        /// <see cref="Pos"/>
+        /// </summary>
+        private int pos;
+        /// <summary>
         /// 次回変換開始位置
         /// </summary>
-        private int Pos = 0;
+        public int Pos
+        {
+            get
+            {
+                return pos;
+            }
+            set
+            {
+                if (value < 0)
+                {
+                    pos = 0;
+                }
+                else
+                {
+                    pos = value;
+                }
+            }
+        }
 
         /// <summary>
         /// コンストラクタ
@@ -638,12 +661,11 @@ namespace WpfApp.Models
         /// <param name="id">入力データリスト</param>
         /// <param name="od">出力データリスト</param>
         /// <returns>データ数</returns>
+        /// - 各盤面を[2*64@2]の入力データと[1@10]の出力データに変換
+        /// - 各盤面の回転と反転に対応する８種類の入出力データを生成
         public int GetConvData8<T>(int count, List<T[]> id, List<int> od)
         {
-            if (KFList.Count == 0)
-            {
-                return 0;
-            }
+            int res = 0;
             for (int i = 0; i < count && Pos < KFList.Count; i++)
             {
                 // 回転
@@ -657,9 +679,10 @@ namespace WpfApp.Models
                 ConvData(ToolsKF.Conv(KFList[Pos].Record, 6), KFList[Pos].Result, Common.BB_WHITE, Common.BB_BLACK, id, od);
                 ConvData(ToolsKF.Conv(KFList[Pos].Record, 7), KFList[Pos].Result, Common.BB_WHITE, Common.BB_BLACK, id, od);
                 Pos++;
+                res += 8;
             }
             Pos %= KFList.Count;
-            return od.Count;
+            return res;
         }
 
         /// <summary>

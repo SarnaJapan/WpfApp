@@ -12,14 +12,14 @@
         public const int SIZE = 8;
 
         /// @name 石色
-        //@{
+        ///@{
         public const int NULL = 0;
         public const int BLACK = 1;
         public const int WHITE = -1;
-        //@}
+        ///@}
 
         /// @name バージョン情報
-        //@{
+        ///@{
 
         /// <summary>
         /// 表示フォーマット
@@ -32,7 +32,7 @@
         /// </summary>
         public const string OPTION_NOEVAL = "/NoEval";
 
-        //@}
+        ///@}
 
         /// <summary>
         /// 疑似乱数ジェネレータ

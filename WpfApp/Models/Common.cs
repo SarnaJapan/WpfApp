@@ -19,25 +19,25 @@ namespace WpfApp.Models
         /// @note 旧版のみ変更可能。BitBoard版は8のみ有効。ビューと一致させること。
         public const int SIZE = 8;
 
+        /// @name 石色
+        ///@{
+        public const int NULL = 0;
+        public const int BLACK = 1;
+        public const int WHITE = -1;
+        ///@}
+
         /// <summary>
         /// タイトル
         /// </summary>
         public const string TITLE = "WPF Othello";
 
-        /// @name 石色
-        //@{
-        public const int NULL = 0;
-        public const int BLACK = 1;
-        public const int WHITE = -1;
-        //@}
-
         /// @name タイトル種別
-        //@{
+        ///@{
         public const int TITLE_PLAYER = 0;
         public const int TITLE_RESULT = 1;
         public const int TITLE_WAIT = 2;
         public const int TITLE_PASS = 3;
-        //@}
+        ///@}
 
         /// <summary>
         /// BitBoard版初期値：黒
@@ -50,7 +50,7 @@ namespace WpfApp.Models
         public const ulong BB_WHITE = 0x0000001008000000;
 
         /// @name バージョン情報
-        //@{
+        ///@{
 
         /// <summary>
         /// 表示フォーマット
@@ -68,7 +68,7 @@ namespace WpfApp.Models
         /// </summary>
         public const string OPTION_NOEVAL = "/NoEval";
 
-        //@}
+        ///@}
 
         /// <summary>
         /// 疑似乱数ジェネレータ
@@ -76,7 +76,7 @@ namespace WpfApp.Models
         public static System.Random R = new System.Random();
 
         /// @name コマンド種別
-        //@{
+        ///@{
         public const string TEST_CREATE = "棋譜生成(->log_vs)";
         public const string TEST_CONVERT = "棋譜変換(->log_wt)";
         public const string TEST_CHECK = "棋譜確認(->log_ok)";
@@ -90,7 +90,7 @@ namespace WpfApp.Models
         public const string TEST_TRAIN_NW_KELP1 = "Train Network 01 (Kelp)";
         public const string TEST_TRAIN_NW_KELP2 = "Train Network 02 (Kelp)";
         public const string TEST_TRAIN_NW_KELP3 = "Train Network 03 (Kelp)";
-        //@}
+        ///@}
 
         /// <summary>
         /// 実験処理

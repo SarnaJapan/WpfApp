@@ -4,16 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-using static WpfApp.Models.ToolsKF;
-
 // using Real = System.Double;
 using Real = System.Single;
 
 namespace WpfApp.Models
 {
     /// <summary>
-    /// 機械学習関連処理(Kelp.Net)
+    /// 機械学習関連管理クラス(Kelp.Net)
     /// </summary>
+    /// Kelp.Net関連処理をスタティッククラスで管理
     internal static class ToolsMLKelp
     {
         #region Parameter
@@ -197,7 +196,7 @@ namespace WpfApp.Models
         {
             var res = new double[64];
             LoadNetwork(type);
-            KelpNet.NdArray<Real> id = ConvInputData<Real>(p, o);
+            KelpNet.NdArray<Real> id = ToolsKF.ConvInputData<Real>(p, o);
             KelpNet.NdArray<Real> od = NN[type].Predict(id)[0];
             if (res.Length == od.Length)
             {
