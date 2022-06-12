@@ -1,4 +1,4 @@
-﻿using Utils;
+﻿using WpfApp.Utils;
 
 namespace WpfApp.ViewModels
 {
@@ -10,17 +10,17 @@ namespace WpfApp.ViewModels
         #region ダイアログ表示対応
 
         /// <summary>
-        /// 表示終了処理
+        /// ダイアログ終了処理
         /// </summary>
         private readonly System.Action CloseAction;
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="closeAction">表示終了処理</param>
+        /// <param name="closeAction">ダイアログ終了処理</param>
         public InfoViewModel(System.Action closeAction)
         {
-            // 呼出元で定義した表示終了処理を登録する
+            // 呼出元で定義した処理を登録する
             CloseAction = closeAction;
         }
 
@@ -29,7 +29,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         private DelegateCommand closeCommand;
         /// <summary>
-        /// 表示終了コマンド
+        /// ダイアログ終了コマンド
         /// </summary>
         public DelegateCommand CloseCommand => closeCommand ?? (closeCommand = new DelegateCommand(_ =>
         {
@@ -43,9 +43,9 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// 終了処理
         /// </summary>
-        public static void Closing()
+        public void Closing()
         {
-            // 表示終了時にDialogBehaviorから呼び出される
+            // 終了時にDialogBehaviorから呼び出される
         }
 
         #endregion

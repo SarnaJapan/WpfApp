@@ -1,15 +1,14 @@
 ﻿// メイン処理の版数。MainViewModel.cs と一致させること。
 // #define MODE_V1
 
-using OthelloInterface;
-
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Utils;
 using WpfApp.Models;
+using WpfApp.Utils;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.ViewModels
 {
@@ -21,7 +20,7 @@ namespace WpfApp.ViewModels
         #region ダイアログ表示対応
 
         /// <summary>
-        /// 表示終了処理
+        /// ダイアログ終了処理
         /// </summary>
         private readonly System.Action CloseAction;
 
@@ -37,7 +36,7 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="closeAction">表示終了処理</param>
+        /// <param name="closeAction">ダイアログ終了処理</param>
         /// <param name="master">設定対象ゲームマスター</param>
 #if MODE_V1
         public CtrlViewModel(System.Action closeAction, MasterV1 master)
@@ -88,7 +87,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         private DelegateCommand closeCommand;
         /// <summary>
-        /// 表示終了コマンド
+        /// ダイアログ終了コマンド
         /// </summary>
         public DelegateCommand CloseCommand => closeCommand ?? (closeCommand = new DelegateCommand(_ =>
         {
@@ -304,6 +303,7 @@ namespace WpfApp.ViewModels
         /// <see cref="TestType"/>
         /// </summary>
         private string testType = "";
+        /// <summary>
         /// コマンド種別
         /// </summary>
         public string TestType
@@ -518,7 +518,7 @@ namespace WpfApp.ViewModels
                     case Common.TEST_REINFORCE_KELP:
                         AsyncCall(ToolsMLKelp.ReinforceNetwork, new object[] { LogDir });
                         break;
-                    /// @todo 実験用のため修正予定
+                    // @todo 実験用のため修正予定
                     case Common.TEST_TRAIN_NW_KELP0:
                         AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 0 });
                         break;
@@ -531,7 +531,7 @@ namespace WpfApp.ViewModels
                     case Common.TEST_TRAIN_NW_KELP3:
                         AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 3 });
                         break;
-                    /// @todo 実験用のため修正予定
+                    // @todo 実験用のため修正予定
                     default:
                         AsyncCall(Common.TestCommand);
                         break;
@@ -539,14 +539,14 @@ namespace WpfApp.ViewModels
             }
             else
             {
-                // パラメーラ指定あり
+                // パラメータ指定あり
                 AsyncCall(Common.TestCommandBase, new object[] { param });
             }
         },
         _ =>
         {
             var res = !IsBusy;
-            // 棋譜生成はBitBoard版のみ
+            // 旧版での棋譜生成は非対応
             if (ModeV1 && TestType == Common.TEST_CREATE)
             {
                 res = false;

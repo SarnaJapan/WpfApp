@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Utils
+namespace WpfApp.Utils
 {
     /// <summary>
     /// INotifyPropertyChanged 実装基底クラス

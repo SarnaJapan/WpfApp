@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace Utils
+namespace WpfApp.Utils
 {
     /// <summary>
     /// 座標変換処理

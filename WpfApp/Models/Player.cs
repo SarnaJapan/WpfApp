@@ -1,6 +1,5 @@
-﻿using OthelloInterface;
-
-using System.Linq;
+﻿using System.Linq;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.Models
 {

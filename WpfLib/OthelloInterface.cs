@@ -1,4 +1,4 @@
-﻿namespace OthelloInterface
+﻿namespace WpfLib.OthelloInterface
 {
     /// <summary>
     /// オセロプレイヤーインターフェース（旧版）

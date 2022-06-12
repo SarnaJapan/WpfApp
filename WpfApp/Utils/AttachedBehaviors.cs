@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace Utils
+namespace WpfApp.Utils
 {
     /// <summary>
     /// ダイアログ表示ビヘイビア
@@ -147,7 +147,7 @@ namespace Utils
         }
 
         /// <summary>
-        /// ダイアログ表示終了
+        /// ダイアログ終了
         /// </summary>
         /// <param name="element"></param>
         private static void CloseDialog(FrameworkElement element)

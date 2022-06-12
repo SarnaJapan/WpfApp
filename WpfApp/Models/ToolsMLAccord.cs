@@ -10,7 +10,7 @@ using System.Threading;
 namespace WpfApp.Models
 {
     /// <summary>
-    /// 機械学習処理スタティッククラス(Accord.Net)
+    /// 機械学習関連スタティッククラス(Accord.Net)
     /// </summary>
     internal static class ToolsMLAccord
     {
@@ -123,14 +123,14 @@ namespace WpfApp.Models
         internal static string TrainNetwork(System.IProgress<string> progress, CancellationToken token, object[] param)
         {
             // パラメータ確認
-            string path = "";
-            int type = 0;
-            if (param.Length == 2)
+            string path;
+            int type;
+            try
             {
                 path = (string)param[0];
                 type = (int)param[1];
             }
-            else
+            catch (System.Exception)
             {
                 return "Invalid parameter.";
             }
@@ -201,7 +201,10 @@ namespace WpfApp.Models
             progress.Report("Network Saving...");
             NN.Save(FILE_NN);
             System.Diagnostics.Debug.WriteLine("-> Save " + FILE_NN);
-            Common.SaveLogList(FILE_LOG, res);
+            if (!Common.SaveLogList(FILE_LOG, res))
+            {
+                return "Save failed.";
+            }
 
             return $"{res.Count}/{trainCount}";
         }

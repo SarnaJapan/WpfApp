@@ -374,12 +374,15 @@ namespace WpfApp.Models
                     buf.Add($"{mcts.Param},{resp[1]},{resp[0]},{resp[2]},{reso[1]},{reso[0]},{reso[2]}");
                 }
                 sw.Stop();
-                buf.Insert(0, $"C,White-Lose,Draw,White-Win,Black-Win,Draw,Black-Lose,Playout={mcts.Count}");
-                Common.SaveLogList(Path.Combine(path, FILE_PARAM), buf);
             }
             catch (System.Exception ex)
             {
                 return ex.Message;
+            }
+            buf.Insert(0, $"C,White-Lose,Draw,White-Win,Black-Win,Draw,Black-Lose,Playout={mcts.Count}");
+            if (!Common.SaveLogList(Path.Combine(path, FILE_PARAM), buf))
+            {
+                return "Save failed.";
             }
 
             return $"{sw.ElapsedMilliseconds} ms";

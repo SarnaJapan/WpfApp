@@ -1,6 +1,5 @@
-﻿using OthelloInterface;
-
-using System.Threading;
+﻿using System.Threading;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.Models
 {
@@ -353,7 +352,7 @@ namespace WpfApp.Models
         /// <param name="po">プレイヤー：相手</param>
         /// <param name="p">BitBoard：自分</param>
         /// <param name="o">BitBoard：相手</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">結果矛盾</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">計算結果矛盾</exception>
         /// <returns>石差</returns>
         public static int Playout(IOthelloPlayer pp, IOthelloPlayer po, ulong p, ulong o)
         {

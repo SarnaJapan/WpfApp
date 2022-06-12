@@ -1,8 +1,7 @@
-﻿using OthelloInterface;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.Models
 {
@@ -229,7 +228,7 @@ namespace WpfApp.Models
         /// <param name="po">プレイヤー：相手</param>
         /// <param name="cp">石色</param>
         /// <param name="data">盤面</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">結果矛盾</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">計算結果矛盾</exception>
         /// <returns>石差</returns>
         public static int Playout(IOthelloPlayerV1 pp, IOthelloPlayerV1 po, int cp, int[] data)
         {

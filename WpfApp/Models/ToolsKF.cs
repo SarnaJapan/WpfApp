@@ -1,9 +1,8 @@
-﻿using OthelloInterface;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.Models
 {
@@ -61,13 +60,9 @@ namespace WpfApp.Models
 
                 progress.Report($"{i}");
             }
-            try
+            if (!Common.SaveLogList(Path.Combine(path, FILE_VS), list))
             {
-                Common.SaveLogList(Path.Combine(path, FILE_VS), list);
-            }
-            catch (System.Exception ex)
-            {
-                return ex.Message;
+                return "Save failed.";
             }
 
             return $"{list.Count / 2}";
@@ -84,54 +79,54 @@ namespace WpfApp.Models
         {
             // パラメータ確認
             string path;
-            if (param.Length == 1)
+            try
             {
-                path = (string)param[0];
+                path = Path.Combine((string)param[0], "wtb");
             }
-            else
+            catch (System.Exception)
             {
                 return "Invalid parameter.";
             }
 
             int[] res = { 0, 0, 0, };
+            var list = new List<string>();
             int[] log;
-            try
+            if (!Directory.Exists(path))
             {
-                var list = new List<string>();
-                var wtb = Directory.GetFiles(Path.Combine(path, "wtb"), "*.wtb");
-                if (wtb.Length == 0)
-                {
-                    return "File not found.";
-                }
-                foreach (var file in wtb)
-                {
-                    foreach (var item in LoadWTB(file))
-                    {
-                        // 変換（11=A1～88=H8）
-                        for (int i = 0; i < item.Length; i++)
-                        {
-                            item[i] = (item[i] / 10 - 1) * 8 + item[i] % 10 - 1;
-                        }
-                        // 保存（PASS=-1）
-                        log = Norm(item, out int r);
-                        if (log.Length > 0)
-                        {
-                            list.Add(string.Join(",", log));
-                            res[(r > 0) ? 1 : (r < 0) ? 2 : 0]++;
-                        }
-                    }
-
-                    progress.Report($"{res[1]}/{res[0]}/{res[2]}");
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-                Common.SaveLogList(Path.Combine(path, FILE_WT), list);
+                return "Path not found.";
             }
-            catch (System.Exception ex)
+            var wtb = Directory.GetFiles(path, "*.wtb");
+            if (wtb.Length == 0)
             {
-                return ex.Message;
+                return "Data not found.";
+            }
+            foreach (var file in wtb)
+            {
+                foreach (var item in LoadWTB(file))
+                {
+                    // 変換（11=A1～88=H8）
+                    for (int i = 0; i < item.Length; i++)
+                    {
+                        item[i] = (item[i] / 10 - 1) * 8 + item[i] % 10 - 1;
+                    }
+                    // 保存（PASS=-1）
+                    log = Norm(item, out int r);
+                    if (log.Length > 0)
+                    {
+                        list.Add(string.Join(",", log));
+                        res[(r > 0) ? 1 : (r < 0) ? 2 : 0]++;
+                    }
+                }
+
+                progress.Report($"{res[1]}/{res[0]}/{res[2]}");
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+            if (!Common.SaveLogList(Path.Combine(path, FILE_WT), list))
+            {
+                return "Save failed.";
             }
 
             return $"{res[1]}/{res[0]}/{res[2]}";
@@ -158,44 +153,43 @@ namespace WpfApp.Models
             }
 
             int[] res = { 0, 0, 0, };
-            try
+            var list = new List<string>();
+            var err = new List<string>();
+            var tmp = LoadKF(Path.Combine(path, FILE_VS));
+            if (tmp.Count == 0)
             {
-                var list = new List<string>();
-                var err = new List<string>();
-                var tmp = LoadKF(Path.Combine(path, FILE_VS));
-                if (tmp.Count == 0)
-                {
-                    return "File not found.";
-                }
-                foreach (var item in tmp)
-                {
-                    var log = Norm(item, out int r);
-                    if (log.Length > 0)
-                    {
-                        log = (log[0] == 26) ? Conv(log, 1) : (log[0] == 44) ? Conv(log, 2) : (log[0] == 19) ? Conv(log, 3) : log;
-                        list.Add(string.Join(",", log));
-                        res[(r > 0) ? 1 : (r < 0) ? 2 : 0]++;
-                    }
-                    else
-                    {
-                        err.Add(string.Join(",", item));
-                    }
-
-                    if (list.Count % 100 == 0)
-                    {
-                        progress.Report($"{res[1]}/{res[0]}/{res[2]}");
-                    }
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-                Common.SaveLogList(Path.Combine(path, FILE_OK), list.Distinct().ToList());
-                Common.SaveLogList(Path.Combine(path, FILE_NG), err.Distinct().ToList());
+                return "Data not found.";
             }
-            catch (System.Exception ex)
+            foreach (var item in tmp)
             {
-                return ex.Message;
+                var log = Norm(item, out int r);
+                if (log.Length > 0)
+                {
+                    log = (log[0] == 26) ? Conv(log, 1) : (log[0] == 44) ? Conv(log, 2) : (log[0] == 19) ? Conv(log, 3) : log;
+                    list.Add(string.Join(",", log));
+                    res[(r > 0) ? 1 : (r < 0) ? 2 : 0]++;
+                }
+                else
+                {
+                    err.Add(string.Join(",", item));
+                }
+
+                if (list.Count % 100 == 0)
+                {
+                    progress.Report($"{res[1]}/{res[0]}/{res[2]}");
+                }
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+            if (!Common.SaveLogList(Path.Combine(path, FILE_OK), list.Distinct().ToList()))
+            {
+                return "Save failed.";
+            }
+            if (!Common.SaveLogList(Path.Combine(path, FILE_NG), err.Distinct().ToList()))
+            {
+                return "Save failed.";
             }
 
             return $"{res[1]}/{res[0]}/{res[2]}";
@@ -264,7 +258,7 @@ namespace WpfApp.Models
         /// <param name="log">棋譜</param>
         /// <param name="type">相似種別(0-7)</param>
         /// <returns>結果</returns>
-        internal static int[] Conv(int[] log, int type)
+        public static int[] Conv(int[] log, int type)
         {
             int[,] T = new int[8, 64] {
                 // 回転
@@ -301,7 +295,7 @@ namespace WpfApp.Models
         /// <param name="log">棋譜</param>
         /// <param name="diff">石差</param>
         /// <returns>結果</returns>
-        internal static int[] Norm(int[] log, out int diff)
+        public static int[] Norm(int[] log, out int diff)
         {
             var res = new List<int>();
             ulong p = Common.BB_BLACK;
@@ -420,13 +414,13 @@ namespace WpfApp.Models
             //  1: ファイルの作られた月
             //  1: ファイルの作られた日
             //  4: 記録されている試合の数
-            //  2: 記録されている大会または対戦者名の数
+            //  2: 記録されている大会名または対戦者名の数
             //  2: 対戦の行われた年
             //  4: 予備
             const int UNIT = 68;
             //  2: 大会名のインデックス
-            //  2: 黒番の対戦者のインデックス
-            //  2: 白番の対戦者のインデックス
+            //  2: 黒番の対戦者名のインデックス
+            //  2: 白番の対戦者名のインデックス
             //  1: 対戦結果（黒石の数）
             //  1: 理論スコア（黒石の数）
             // 60: 棋譜（11=A1～88=H8）
@@ -450,7 +444,7 @@ namespace WpfApp.Models
         /// </summary>
         /// <param name="path">ファイルパス</param>
         /// <returns>棋譜リスト</returns>
-        internal static List<int[]> LoadKF(string path)
+        public static List<int[]> LoadKF(string path)
         {
             var res = new List<int[]>();
 
@@ -484,7 +478,7 @@ namespace WpfApp.Models
         /// <param name="p">自分</param>
         /// <param name="o">相手</param>
         /// <returns>変換結果</returns>
-        internal static T[] ConvInputData<T>(ulong p, ulong o)
+        public static T[] ConvInputData<T>(ulong p, ulong o)
         {
             T[] res = new T[128];
             ulong t;
@@ -542,7 +536,7 @@ namespace WpfApp.Models
         /// <typeparam name="T"></typeparam>
         /// <param name="pos">位置</param>
         /// <returns>変換結果</returns>
-        internal static T[] ConvOutputData<T>(int pos)
+        public static T[] ConvOutputData<T>(int pos)
         {
             T[] res = new T[64];
             if (pos >= 0 && pos < 64)

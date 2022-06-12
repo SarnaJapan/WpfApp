@@ -85,11 +85,12 @@ namespace WpfApp.Models
         public const string TEST_REINFORCE = "Reinforce (Accord)";
         public const string TEST_TRAIN_NW_KELP = "Train Network (Kelp)";
         public const string TEST_REINFORCE_KELP = "Reinforce (Kelp)";
-
+        // @todo 実験用のため修正予定
         public const string TEST_TRAIN_NW_KELP0 = "Train Network 00 (Kelp)";
         public const string TEST_TRAIN_NW_KELP1 = "Train Network 01 (Kelp)";
         public const string TEST_TRAIN_NW_KELP2 = "Train Network 02 (Kelp)";
         public const string TEST_TRAIN_NW_KELP3 = "Train Network 03 (Kelp)";
+        // @todo 実験用のため修正予定
         ///@}
 
         /// <summary>
@@ -176,7 +177,7 @@ namespace WpfApp.Models
         /// <summary>
         /// プラグインリスト取得
         /// </summary>
-        /// <typeparam name="T">タイプ</typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <returns>プラグインリスト</returns>
         public static List<T> GetPluginList<T>()
         {
@@ -250,8 +251,8 @@ namespace WpfApp.Models
         /// </summary>
         /// <param name="path">パス</param>
         /// <param name="log">文字列リスト</param>
-        /// <exception cref="System.Exception">StreamWriter()関連</exception>
-        public static void SaveLogList(string path, List<string> log)
+        /// <returns>書き込み結果</returns>
+        public static bool SaveLogList(string path, List<string> log)
         {
             StreamWriter sw = null;
             try
@@ -265,12 +266,14 @@ namespace WpfApp.Models
             catch (System.Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
-                throw;
+                return false;
             }
             finally
             {
                 sw?.Close();
             }
+
+            return true;
         }
 
         #endregion

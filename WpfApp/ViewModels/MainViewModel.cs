@@ -3,8 +3,8 @@
 
 using System.ComponentModel;
 using System.Windows.Data;
-using Utils;
 using WpfApp.Models;
+using WpfApp.Utils;
 
 namespace WpfApp.ViewModels
 {

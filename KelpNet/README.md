@@ -35,8 +35,8 @@ FunctionStack<float> nn = new FunctionStack<float>(
 
 
 ## Features
-- No libraries are used for matrix operations, so all algorithms are readable.
 - Uses the same "Define by Run" approach as PyTorch and Keras.
+- No libraries are used for matrix operations, so all algorithms are readable.
 - OpenCL is used for parallel processing, so processing can be parallelized not only on GPUs, but also on CPUs, FPGAs, and various other computing devices.
 > * Additional installation of the corresponding driver may be required to use OpenCL.
 > - Intel CPU or GPU: https://software.intel.com/en-us/articles/opencl-drivers
@@ -59,7 +59,7 @@ Twitter: https://twitter.com/harujoh
 Libraries: .NET Standard 2.0 or 2.1  
 Samples: .NET Framework 4.6.1  
 
-## mplemented Functions
+## Implemented Functions
 - Connections:
 　・Convolution2D
 　・Deconvolution2D

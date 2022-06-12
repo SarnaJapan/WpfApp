@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp.Views"
-        xmlns:localU="clr-namespace:Utils"
+        xmlns:localU="clr-namespace:WpfApp.Utils"
         xmlns:localVM="clr-namespace:WpfApp.ViewModels"
         mc:Ignorable="d"
         Height="600" Width="578" Title="{Binding Path=Title}" ResizeMode="NoResize">
@@ -14,6 +14,14 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <!-- ダイアログ用テンプレート -->
+        <DataTemplate x:Key="CtrlView">
+            <local:CtrlView />
+        </DataTemplate>
+        <DataTemplate x:Key="InfoView">
+            <local:InfoView />
+        </DataTemplate>
+
         <!-- 座標変換用の行サイズを指定する。モデルと一致させること。 -->
         <localU:PositionConverter x:Key="PositionConverter" RowSize="8" />
 
@@ -134,22 +142,12 @@
                     <Separator />
                     <MenuItem Header="設定" Command="{Binding Path=CtrlCommand}"
                     localU:DialogBehavior.Title="設定"
-                    localU:DialogBehavior.Content="{Binding Path=CtrlViewModel}">
-                        <localU:DialogBehavior.Template>
-                            <DataTemplate>
-                                <local:CtrlView />
-                            </DataTemplate>
-                        </localU:DialogBehavior.Template>
-                    </MenuItem>
+                    localU:DialogBehavior.Content="{Binding Path=CtrlViewModel}"
+                    localU:DialogBehavior.Template="{StaticResource CtrlView}" />
                     <MenuItem Header="情報" Command="{Binding Path=InfoCommand}"
                     localU:DialogBehavior.Title="情報"
-                    localU:DialogBehavior.Content="{Binding Path=InfoViewModel}">
-                        <localU:DialogBehavior.Template>
-                            <DataTemplate>
-                                <local:InfoView />
-                            </DataTemplate>
-                        </localU:DialogBehavior.Template>
-                    </MenuItem>
+                    localU:DialogBehavior.Content="{Binding Path=InfoViewModel}"
+                    localU:DialogBehavior.Template="{StaticResource InfoView}" />
                 </ContextMenu>
             </Border.ContextMenu>
         </Border>

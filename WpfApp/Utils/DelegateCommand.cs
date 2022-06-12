@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace Utils
+namespace WpfApp.Utils
 {
     /// <summary>
     /// ICommand 実装基底クラス

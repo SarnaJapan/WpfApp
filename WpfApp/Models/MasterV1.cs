@@ -1,8 +1,7 @@
-﻿using OthelloInterface;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Utils;
+using WpfApp.Utils;
+using WpfLib.OthelloInterface;
 
 namespace WpfApp.Models
 {

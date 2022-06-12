@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:WpfApp.Views"
-             xmlns:localU="clr-namespace:Utils"
+             xmlns:localU="clr-namespace:WpfApp.Utils"
              mc:Ignorable="d"
              Height="500" Width="380">
 

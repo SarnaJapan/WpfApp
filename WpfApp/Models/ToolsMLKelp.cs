@@ -10,9 +10,8 @@ using Real = System.Single;
 namespace WpfApp.Models
 {
     /// <summary>
-    /// 機械学習関連管理クラス(Kelp.Net)
+    /// 機械学習関連スタティッククラス(Kelp.Net)
     /// </summary>
-    /// Kelp.Net関連処理をスタティッククラスで管理
     internal static class ToolsMLKelp
     {
         #region Parameter
@@ -58,7 +57,7 @@ namespace WpfApp.Models
         /// データセット
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        private class KFDataSet<T> where T : unmanaged, System.IComparable<T>
+        private class DataSet<T> where T : unmanaged, System.IComparable<T>
         {
             /// <summary>
             /// データセット
@@ -70,7 +69,7 @@ namespace WpfApp.Models
             /// </summary>
             /// <param name="loader">データローダ</param>
             /// <param name="count">要求数</param>
-            public KFDataSet(KFDataLoader loader, int count)
+            public DataSet(KFDataLoader loader, int count)
             {
                 int[] shape = new int[] { 2, 8, 8, };
                 List<T[]> id = new List<T[]>();
@@ -220,12 +219,12 @@ namespace WpfApp.Models
             // パラメータ確認
             string path;
             int type;
-            if (param.Length == 2)
+            try
             {
                 path = (string)param[0];
                 type = (int)param[1];
             }
-            else
+            catch (System.Exception)
             {
                 return "Invalid parameter.";
             }
@@ -252,12 +251,12 @@ namespace WpfApp.Models
                 return "No/Insufficient data.";
             }
             // 評価データ
-            KFDataSet<Real> evalDataset = new KFDataSet<Real>(DataLoader, BATCH_SIZE);
+            DataSet<Real> evalDataset = new DataSet<Real>(DataLoader, BATCH_SIZE);
 
             for (int i = 1; i < trainCount && !token.IsCancellationRequested; i++)
             {
                 // 訓練データ
-                KFDataSet<Real> dataset = new KFDataSet<Real>(DataLoader, BATCH_SIZE);
+                DataSet<Real> dataset = new DataSet<Real>(DataLoader, BATCH_SIZE);
                 sw.Restart();
                 Real loss = KelpNet.Trainer.Train(NN[type], dataset.Data, new KelpNet.SoftmaxCrossEntropy<Real>(), new KelpNet.Adam<Real>());
                 sw.Stop();
@@ -279,7 +278,10 @@ namespace WpfApp.Models
             progress.Report("Network Saving...");
             ModelIO<Real>.Save(NN[type], FILE_NN[type]);
             System.Diagnostics.Debug.WriteLine("-> Save " + FILE_NN[type]);
-            Common.SaveLogList(FILE_LOG[type], res);
+            if (!Common.SaveLogList(FILE_LOG[type], res))
+            {
+                return "Save failed.";
+            }
 
             return $"{res.Count}/{trainCount}";
         }

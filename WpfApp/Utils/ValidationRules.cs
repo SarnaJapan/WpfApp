@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Controls;
 
-namespace Utils
+namespace WpfApp.Utils
 {
     /// <summary>
     /// 入力範囲確認(Integer)
@@ -24,7 +24,7 @@ namespace Utils
         /// </summary>
         /// <param name="value"></param>
         /// <param name="cultureInfo"></param>
-        /// <returns></returns>
+        /// <returns>結果</returns>
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             int i;
@@ -54,7 +54,7 @@ namespace Utils
         /// </summary>
         /// <param name="value"></param>
         /// <param name="cultureInfo"></param>
-        /// <returns></returns>
+        /// <returns>結果</returns>
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             if (!Directory.Exists((string)value))
