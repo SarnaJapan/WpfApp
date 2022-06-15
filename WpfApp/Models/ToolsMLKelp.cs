@@ -1,4 +1,5 @@
 ﻿using KelpNet.CL;
+// using KelpNet.CPU;
 
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,9 @@ namespace WpfApp.Models
         /// <summary>
         /// ネットワークファイル名
         /// </summary>
-        private static readonly string[] FILE_NN = { "kelp00.mlp", "kelp01.mlp", "kelp02.mlp", "kelp03.mlp", };
+        ///private static readonly string[] FILE_NN = { "kelp00.mlp", "kelp01.mlp", "kelp02.mlp", "kelp03.mlp", };
+        /// @todo CL/CPU共有不可
+        private static readonly string[] FILE_NN = { "kelpcl00.mlp", "kelpcl01.mlp", "kelpcl02.mlp", "kelpcl03.mlp", };
 
         /// <summary>
         /// ログファイル名
@@ -114,8 +117,15 @@ namespace WpfApp.Models
             {
                 if (File.Exists(FILE_NN[type]))
                 {
-                    NN[type] = (FunctionStack<Real>)ModelIO<Real>.Load(FILE_NN[type]);
-                    System.Diagnostics.Debug.WriteLine("-> Load " + GetNetworkInfo(type));
+                    try
+                    {
+                        NN[type] = (FunctionStack<Real>)ModelIO<Real>.Load(FILE_NN[type]);
+                        System.Diagnostics.Debug.WriteLine("-> Load " + GetNetworkInfo(type));
+                    }
+                    catch (System.Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    }
                 }
                 if (NN[type] == null)
                 {

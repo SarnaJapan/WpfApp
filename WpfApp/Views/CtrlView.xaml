@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:WpfApp.Views"
              xmlns:localU="clr-namespace:WpfApp.Utils"
              mc:Ignorable="d"
-             Height="500" Width="380">
+             Height="500" Width="380"
+             localU:CloseWindowBehavior.Close="{Binding CloseWindow}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

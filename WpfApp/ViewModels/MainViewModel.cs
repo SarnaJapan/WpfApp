@@ -224,16 +224,6 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
-        /// 情報ダイアログ表示
-        /// </summary>
-        private void OpenInfoDialog() => InfoViewModel = new InfoViewModel(CloseInfoDialog);
-
-        /// <summary>
-        /// 情報ダイアログ表示終了
-        /// </summary>
-        private void CloseInfoDialog() => InfoViewModel = null;
-
-        /// <summary>
         ///  <see cref="CtrlViewModel" />
         /// </summary>
         private CtrlViewModel ctrlViewModel;
@@ -253,19 +243,47 @@ namespace WpfApp.ViewModels
             }
         }
 
-        /// <summary>
-        /// 設定ダイアログ表示
-        /// </summary>
-        private void OpenCtrlDialog() => CtrlViewModel = new CtrlViewModel(CloseCtrlDialog, Master);
-
-        /// <summary>
-        /// 設定ダイアログ表示終了
-        /// </summary>
-        private void CloseCtrlDialog() => CtrlViewModel = null;
-
         #endregion
 
         #region コマンド
+
+        /// <summary>
+        /// <see cref="OnCloseInfoCommand"/>
+        /// </summary>
+        private DelegateCommand onCloseInfoCommand;
+        /// <summary>
+        /// 情報終了時処理用コマンド
+        /// </summary>
+        public DelegateCommand OnCloseInfoCommand => onCloseInfoCommand ?? (onCloseInfoCommand = new DelegateCommand(_ =>
+        {
+            System.Diagnostics.Debug.WriteLine("-> OnCloseInfoCommand()");
+        },
+        _ =>
+        {
+            return true;
+        }));
+
+        /// <summary>
+        /// <see cref="OnCloseCtrlCommand"/>
+        /// </summary>
+        private DelegateCommand onCloseCtrlCommand;
+        /// <summary>
+        /// 設定終了時処理用コマンド
+        /// </summary>
+        public DelegateCommand OnCloseCtrlCommand => onCloseCtrlCommand ?? (onCloseCtrlCommand = new DelegateCommand(_ =>
+        {
+            System.Diagnostics.Debug.WriteLine("-> OnCloseCtrlCommand()");
+            // 設定変更反映
+            Master.SetBack(true);
+            Master.SetInfo(true);
+            Master.SetTitle(Common.TITLE_PLAYER);
+            // 起動中タスクキャンセル
+            CtrlViewModel.CancelCommand.Execute(null);
+        },
+        _ =>
+        {
+            return true;
+        }));
 
         /// <summary>
         /// <see cref="InfoCommand"/>
@@ -276,8 +294,10 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand InfoCommand => infoCommand ?? (infoCommand = new DelegateCommand(_ =>
         {
+            System.Diagnostics.Debug.WriteLine("-> InfoCommand() start");
             IsBusy = true;
-            OpenInfoDialog();
+            InfoViewModel = new InfoViewModel();
+            System.Diagnostics.Debug.WriteLine("-> InfoCommand() end");
             IsBusy = false;
         },
         _ =>
@@ -294,8 +314,10 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand CtrlCommand => ctrlCommand ?? (ctrlCommand = new DelegateCommand(_ =>
         {
+            System.Diagnostics.Debug.WriteLine("-> CtrlCommand() start");
             IsBusy = true;
-            OpenCtrlDialog();
+            CtrlViewModel = new CtrlViewModel(Master);
+            System.Diagnostics.Debug.WriteLine("-> CtrlCommand() end");
             IsBusy = false;
         },
         _ =>

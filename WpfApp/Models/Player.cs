@@ -170,7 +170,9 @@ namespace WpfApp.Models
             var r = d.Where(n => !double.IsNaN(n));
             return (r.Count() == 0) ? 0 : Tools.Pos2Bit(System.Array.IndexOf(d, r.Max()));
         }
-        public double[] Score(ulong p, ulong o) => ToolsMLAccord.Compute(p, o);
+        public double[] Score(ulong p, ulong o) => ToolsMLAccord.Compute(p, o, Param);
+
+        public int Param { get; set; } = 0;
     }
 
     /// <summary>

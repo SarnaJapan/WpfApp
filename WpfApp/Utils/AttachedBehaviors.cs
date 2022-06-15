@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 
 namespace WpfApp.Utils
 {
@@ -16,7 +15,7 @@ namespace WpfApp.Utils
         "Template",
         typeof(DataTemplate),
         typeof(DialogBehavior),
-        new PropertyMetadata(null, OnPropertyChanged));
+        new PropertyMetadata(null));
 
         /// <summary>
         /// コンテンツ
@@ -36,7 +35,17 @@ namespace WpfApp.Utils
         "Title",
         typeof(string),
         typeof(DialogBehavior),
-        new PropertyMetadata("", OnPropertyChanged));
+        new PropertyMetadata(""));
+
+        /// <summary>
+        /// 終了コマンド
+        /// </summary>
+        public static readonly DependencyProperty CloseCommandProperty =
+        DependencyProperty.RegisterAttached(
+        "CloseCommand",
+        typeof(DelegateCommand),
+        typeof(DialogBehavior),
+        new PropertyMetadata(null));
 
         /// <summary>
         /// ダイアログ
@@ -83,11 +92,25 @@ namespace WpfApp.Utils
         public static string GetTitle(DependencyObject obj) => (string)obj.GetValue(TitleProperty);
 
         /// <summary>
-        /// タイトル取得
+        /// タイトル設定
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="value">タイトル</param>
         public static void SetTitle(DependencyObject obj, string value) => obj.SetValue(TitleProperty, value);
+
+        /// <summary>
+        /// 終了コマンド取得
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns>終了コマンド</returns>
+        public static DelegateCommand GetCloseCommand(DependencyObject obj) => (DelegateCommand)obj.GetValue(CloseCommandProperty);
+
+        /// <summary>
+        /// 終了コマンド設定
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="value">終了コマンド</param>
+        public static void SetCloseCommand(DependencyObject obj, DelegateCommand value) => obj.SetValue(CloseCommandProperty, value);
 
         /// <summary>
         /// ダイアログ取得
@@ -141,7 +164,17 @@ namespace WpfApp.Utils
                 Content = GetContent(element),
                 Title = GetTitle(element),
             };
-            dialog.Closing += DialogClosing;
+            var cmd = GetCloseCommand(element);
+            dialog.Closed += (s, e) =>
+            {
+                if (cmd != null)
+                {
+                    if (cmd.CanExecute(dialog.Content))
+                    {
+                        cmd.Execute(dialog.Content);
+                    }
+                }
+            };
             SetDialog(element, dialog);
             dialog.ShowDialog();
         }
@@ -155,17 +188,51 @@ namespace WpfApp.Utils
             GetDialog(element).Close();
             SetDialog(element, null);
         }
+    }
+
+    /// <summary>
+    /// ウィンドウ終了ビヘイビア
+    /// </summary>
+    public static class CloseWindowBehavior
+    {
+        /// <summary>
+        /// 終了プロパティ
+        /// </summary>
+        public static readonly DependencyProperty CloseProperty =
+        DependencyProperty.RegisterAttached(
+        "Close",
+        typeof(bool),
+        typeof(CloseWindowBehavior),
+        new PropertyMetadata(false, OnPropertyChanged));
 
         /// <summary>
-        /// ダイアログ終了処理
+        /// 終了プロパティ設定
         /// </summary>
-        /// <param name="sender">送信元</param>
-        /// <param name="e">イベント</param>
-        private static void DialogClosing(object sender, CancelEventArgs e)
+        /// <param name="obj"></param>
+        /// <returns>終了プロパティ</returns>
+        public static bool GetClose(DependencyObject obj) => (bool)obj.GetValue(CloseProperty);
+
+        /// <summary>
+        /// 終了プロパティ取得
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="value">終了プロパティ</param>
+        public static void SetClose(DependencyObject obj, bool value) => obj.SetValue(CloseProperty, value);
+
+        /// <summary>
+        /// プロパティ変更処理
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="e"></param>
+        private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is Window element)
+            if (!(d is Window win))
             {
-                element.Content.GetType().GetMethod("Closing")?.Invoke(element.Content, null);
+                win = Window.GetWindow(d);
+            }
+            if (GetClose(d))
+            {
+                win.Close();
             }
         }
     }

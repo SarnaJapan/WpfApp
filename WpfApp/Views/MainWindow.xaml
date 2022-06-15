@@ -14,6 +14,9 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <!-- 座標変換用の行サイズを指定する。モデルと一致させること。 -->
+        <localU:PositionConverter x:Key="PositionConverter" RowSize="8" />
+
         <!-- ダイアログ用テンプレート -->
         <DataTemplate x:Key="CtrlView">
             <local:CtrlView />
@@ -21,9 +24,6 @@
         <DataTemplate x:Key="InfoView">
             <local:InfoView />
         </DataTemplate>
-
-        <!-- 座標変換用の行サイズを指定する。モデルと一致させること。 -->
-        <localU:PositionConverter x:Key="PositionConverter" RowSize="8" />
 
         <!-- ホバー位置半透明化ボタン -->
         <SolidColorBrush x:Key="NormalButtonBrush" Color="#ff000000" />
@@ -141,10 +141,12 @@
                     <MenuItem Header="開始" Command="{Binding Path=StartCommand}" />
                     <Separator />
                     <MenuItem Header="設定" Command="{Binding Path=CtrlCommand}"
+                    localU:DialogBehavior.CloseCommand="{Binding OnCloseCtrlCommand}"
                     localU:DialogBehavior.Title="設定"
                     localU:DialogBehavior.Content="{Binding Path=CtrlViewModel}"
                     localU:DialogBehavior.Template="{StaticResource CtrlView}" />
                     <MenuItem Header="情報" Command="{Binding Path=InfoCommand}"
+                    localU:DialogBehavior.CloseCommand="{Binding OnCloseInfoCommand}"
                     localU:DialogBehavior.Title="情報"
                     localU:DialogBehavior.Content="{Binding Path=InfoViewModel}"
                     localU:DialogBehavior.Template="{StaticResource InfoView}" />

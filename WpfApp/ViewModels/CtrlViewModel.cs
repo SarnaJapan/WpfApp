@@ -17,13 +17,6 @@ namespace WpfApp.ViewModels
     /// </summary>
     public class CtrlViewModel : NotificationObject
     {
-        #region ダイアログ表示対応
-
-        /// <summary>
-        /// ダイアログ終了処理
-        /// </summary>
-        private readonly System.Action CloseAction;
-
         /// <summary>
         /// ゲームマスター：設定対象モデルへの参照を起動時に設定
         /// </summary>
@@ -36,15 +29,13 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="closeAction">ダイアログ終了処理</param>
         /// <param name="master">設定対象ゲームマスター</param>
 #if MODE_V1
-        public CtrlViewModel(System.Action closeAction, MasterV1 master)
+        public CtrlViewModel(MasterV1 master)
 #else
-        public CtrlViewModel(System.Action closeAction, Master master)
+        public CtrlViewModel(Master master)
 #endif
         {
-            CloseAction = closeAction;
             Master = master;
 
             // 評価プレイヤー選択肢設定
@@ -82,6 +73,25 @@ namespace WpfApp.ViewModels
             }
         }
 
+        #region ダイアログ表示対応
+
+        /// <summary>
+        /// <see cref="CloseWindow"/>
+        /// </summary>
+        private bool closeWindow = false;
+        /// <summary>
+        /// ダイアログ終了フラグ
+        /// </summary>
+        public bool CloseWindow
+        {
+            get => closeWindow;
+            set
+            {
+                closeWindow = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>
         /// <see cref="CloseCommand"/>
         /// </summary>
@@ -91,25 +101,12 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand CloseCommand => closeCommand ?? (closeCommand = new DelegateCommand(_ =>
         {
-            CloseAction();
+            CloseWindow = true;
         },
         _ =>
         {
             return true;
         }));
-
-        /// <summary>
-        /// 終了処理
-        /// </summary>
-        public void Closing()
-        {
-            // 設定変更反映
-            Master.SetBack(true);
-            Master.SetInfo(true);
-            Master.SetTitle(Common.TITLE_PLAYER);
-            // 起動中タスクキャンセル
-            CancelCommand.Execute(null);
-        }
 
         #endregion
 
@@ -322,7 +319,7 @@ namespace WpfApp.ViewModels
         /// ログディレクトリ
         /// </summary>
         /// public string LogDir { get; set; } = Common.GetAppPath(Common.LOG_DIR);
-        /// @todo 実験用のため修正予定
+        /// @todo デバッグ環境用
         public string LogDir { get; set; } = @"D:\Prog\doc\WpfApp\log";
 
         #endregion

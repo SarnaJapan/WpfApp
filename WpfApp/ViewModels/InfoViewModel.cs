@@ -5,23 +5,82 @@ namespace WpfApp.ViewModels
     /// <summary>
     /// 情報ダイアログ
     /// </summary>
-    public class InfoViewModel
+    /// @par [Communication Diagram]
+    /// @dot
+    /// digraph {
+    ///   rankdir=LR;
+    ///   subgraph cluster0 {
+    ///     label=DialogBehavior
+    ///     node00 [
+    ///       shape=record
+    ///       label="Title |Template |Content"]
+    ///     node01 [
+    ///       shape=record
+    ///       label="DialogClosing()"]
+    ///   }
+    ///   subgraph cluster1 {
+    ///     label=MainVeiw
+    ///     node10 [
+    ///       shape=record
+    ///       label="DialogBehavior.Title |DialogBehavior.Template |DialogBehavior.Content"]
+    ///     node11 [
+    ///       shape=record
+    ///       label="menu"]
+    ///   }
+    ///   subgraph cluster2 {
+    ///     label=MainViewModel
+    ///     node20 [
+    ///       shape=record
+    ///       label="openDialogCommand"]
+    ///     node21 [
+    ///       shape=record
+    ///       label="OpenDialog() |CloseDialog()"]
+    ///   }
+    ///   node1->node2
+    ///   node21->node2 [label="null"]
+    ///   node20->node2 [label="set"]
+    ///   node0->node1 [label = "set"]
+    ///   node10->node2 [label = "binding"] 
+    ///   
+    ///   subgraph cluster3 {
+    ///     label=DialogVeiw
+    ///     node30 [
+    ///       shape=record
+    ///       label="menu"]
+    ///   }
+    ///   subgraph cluster4 {
+    ///     label=DialogViewModel
+    ///     node40 [
+    ///       shape=record
+    ///       label="DialogViewModel"]
+    ///     node41 [
+    ///       shape = record
+    ///       label = "OpenDialogCommand"]
+    ///     node42 [
+    ///       shape = record
+    ///       label = "CloseDialog() |OpenDialog()"]
+    ///   }
+    /// }
+    /// @enddot
+    public class InfoViewModel : NotificationObject
     {
         #region ダイアログ表示対応
 
         /// <summary>
-        /// ダイアログ終了処理
+        /// <see cref="CloseWindow"/>
         /// </summary>
-        private readonly System.Action CloseAction;
-
+        private bool closeWindow = false;
         /// <summary>
-        /// コンストラクタ
+        /// ダイアログ終了フラグ
         /// </summary>
-        /// <param name="closeAction">ダイアログ終了処理</param>
-        public InfoViewModel(System.Action closeAction)
+        public bool CloseWindow
         {
-            // 呼出元で定義した処理を登録する
-            CloseAction = closeAction;
+            get => closeWindow;
+            set
+            {
+                closeWindow = value;
+                OnPropertyChanged();
+            }
         }
 
         /// <summary>
@@ -33,20 +92,12 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand CloseCommand => closeCommand ?? (closeCommand = new DelegateCommand(_ =>
         {
-            CloseAction();
+            CloseWindow = true;
         },
         _ =>
         {
             return true;
         }));
-
-        /// <summary>
-        /// 終了処理
-        /// </summary>
-        public void Closing()
-        {
-            // 終了時にDialogBehaviorから呼び出される
-        }
 
         #endregion
     }

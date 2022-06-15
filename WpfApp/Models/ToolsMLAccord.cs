@@ -24,12 +24,12 @@ namespace WpfApp.Models
         /// <summary>
         /// ネットワークファイル名
         /// </summary>
-        private static readonly string FILE_NN = "accord.dbn";
+        private static readonly string[] FILE_NN = { "accord00.dbn", "accord01.dbn", "accord02.dbn", "accord03.dbn", };
 
         /// <summary>
         /// ログファイル名
         /// </summary>
-        private static readonly string FILE_LOG = "accord.log";
+        private static readonly string[] FILE_LOG = { "accord00.log", "accord01.log", "accord02.log", "accord03.log", };
 
         /// <summary>
         /// データローダ
@@ -39,7 +39,7 @@ namespace WpfApp.Models
         /// <summary>
         /// ネットワーク
         /// </summary>
-        private static DeepBeliefNetwork NN = null;
+        private static readonly DeepBeliefNetwork[] NN = { null, null, null, null, };
 
         /// <summary>
         /// バッチサイズ（正規化棋譜数）
@@ -71,34 +71,42 @@ namespace WpfApp.Models
         /// <summary>
         /// ネットワーク読込
         /// </summary>
+        /// <param name="type">使用ネットワーク番号</param>
         /// <returns>ネットワーク</returns>
-        private static DeepBeliefNetwork LoadNetwork()
+        private static DeepBeliefNetwork LoadNetwork(int type)
         {
-            if (NN == null)
+            if (NN[type] == null)
             {
-                if (File.Exists(FILE_NN))
+                if (File.Exists(FILE_NN[type]))
                 {
-                    NN = DeepBeliefNetwork.Load(FILE_NN);
-                    System.Diagnostics.Debug.WriteLine("-> Load " + GetNetworkInfo());
+                    try
+                    {
+                        NN[type] = DeepBeliefNetwork.Load(FILE_NN[type]);
+                        System.Diagnostics.Debug.WriteLine("-> Load " + GetNetworkInfo(type));
+                    }
+                    catch (System.Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    }
                 }
-                if (NN == null)
+                if (NN[type] == null)
                 {
                     // Bernoulli - Alpha
                     double BERNOULLI_ALPHA = 1.0;
                     // DBN
-                    NN = new DeepBeliefNetwork(
+                    NN[type] = new DeepBeliefNetwork(
                         function: new BernoulliFunction(BERNOULLI_ALPHA),
                         inputsCount: 128, // 黒64＋白64
                         hiddenNeurons: new int[] { 128, 96, 96, 64 } // 結果64
                     );
                     // 重み初期化
-                    new GaussianWeights(NN).Randomize();
+                    new GaussianWeights(NN[type]).Randomize();
                     // 重み更新
-                    NN.UpdateVisibleWeights();
-                    System.Diagnostics.Debug.WriteLine("-> Create " + GetNetworkInfo());
+                    NN[type].UpdateVisibleWeights();
+                    System.Diagnostics.Debug.WriteLine("-> Create " + GetNetworkInfo(type));
                 }
             }
-            return NN;
+            return NN[type];
         }
 
         /// <summary>
@@ -106,11 +114,12 @@ namespace WpfApp.Models
         /// </summary>
         /// <param name="p">自分</param>
         /// <param name="o">相手</param>
+        /// <param name="type">使用ネットワーク番号</param>
         /// <returns>評価配列</returns>
-        internal static double[] Compute(ulong p, ulong o)
+        internal static double[] Compute(ulong p, ulong o, int type)
         {
-            LoadNetwork();
-            return NN.Compute(ToolsKF.ConvInputData<double>(p, o));
+            LoadNetwork(type);
+            return NN[type].Compute(ToolsKF.ConvInputData<double>(p, o));
         }
 
         /// <summary>
@@ -144,21 +153,21 @@ namespace WpfApp.Models
 
             System.Diagnostics.Debug.WriteLine("Network Loading...");
             progress.Report("Network Loading...");
-            LoadNetwork();
+            LoadNetwork(type);
 
             System.Diagnostics.Debug.WriteLine("Training Start...");
             progress.Report("Training Start...");
             res.Add($",error,,elapsed,batch={BATCH_SIZE}");
 
             // 教師ネットワーク
-            var teacher = new DeepNeuralNetworkLearning(NN)
+            var teacher = new DeepNeuralNetworkLearning(NN[type])
             {
                 // Select Supervised Learning Algorithm
                 Algorithm = (ann, i) => new ParallelResilientBackpropagationLearning(ann),
                 // Algorithm = (ann, i) => new ResilientBackpropagationLearning(ann),
                 // Algorithm = (ann, i) => new BackPropagationLearning(ann),
                 // Algorithm = (ann, i) => new PerceptronLearning(ann),
-                LayerIndex = NN.Layers.Length - 1,
+                LayerIndex = NN[type].Layers.Length - 1,
             };
 
             // 1epochの処理回数
@@ -194,14 +203,14 @@ namespace WpfApp.Models
                 progress.Report($"C={i},E={err} @ {sw.Elapsed.TotalMilliseconds} ms");
                 res.Add($",{err},,{sw.Elapsed.TotalMilliseconds},");
 
-                NN.UpdateVisibleWeights();
+                NN[type].UpdateVisibleWeights();
             }
 
             System.Diagnostics.Debug.WriteLine("Network Saving...");
             progress.Report("Network Saving...");
-            NN.Save(FILE_NN);
-            System.Diagnostics.Debug.WriteLine("-> Save " + FILE_NN);
-            if (!Common.SaveLogList(FILE_LOG, res))
+            NN[type].Save(FILE_NN[type]);
+            System.Diagnostics.Debug.WriteLine("-> Save " + FILE_NN[type]);
+            if (!Common.SaveLogList(FILE_LOG[type], res))
             {
                 return "Save failed.";
             }
@@ -225,14 +234,15 @@ namespace WpfApp.Models
         /// <summary>
         /// ネットワーク情報取得
         /// </summary>
+        /// <param name="type">使用ネットワーク番号</param>
         /// <returns>ネットワーク情報</returns>
-        private static string GetNetworkInfo()
+        private static string GetNetworkInfo(int type)
         {
-            string res = FILE_NN;
-            res += " (" + NN.InputsCount + ",";
-            for (int i = 0; i < NN.Layers.Length; i++)
+            string res = FILE_NN[type];
+            res += " (" + NN[type].InputsCount + ",";
+            for (int i = 0; i < NN[type].Layers.Length; i++)
             {
-                res += NN.Layers[i].Neurons.Length + ",";
+                res += NN[type].Layers[i].Neurons.Length + ",";
             }
             res += ")";
             return res;
