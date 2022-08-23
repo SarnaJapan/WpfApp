@@ -6,7 +6,7 @@ namespace WpfLibPlayerV1
     /// <summary>
     /// ランダム戦略プレイヤー
     /// </summary>
-    /// 置石可能位置をランダムで返す。評価選択肢対象外。
+    /// 置石位置をランダムで返す。評価選択肢対象外。
     public class PlayerRandV1 : IOthelloPlayerV1
     {
         public string Name { get; set; } = "ランダム";

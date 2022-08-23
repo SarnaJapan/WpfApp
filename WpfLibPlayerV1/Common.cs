@@ -13,7 +13,7 @@
 
         /// @name 石色
         ///@{
-        public const int NULL = 0;
+        public const int EMPTY = 0;
         public const int BLACK = 1;
         public const int WHITE = -1;
         ///@}

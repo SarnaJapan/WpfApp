@@ -6,7 +6,7 @@ namespace WpfApp.Utils
     /// <summary>
     /// 座標変換処理
     /// </summary>
-    /// @note 変換処理は @ref RowSize に依存
+    /// @note 変換処理は行サイズ(@ref RowSize)に依存
     public class PositionConverter : IMultiValueConverter
     {
         /// <summary>
@@ -52,7 +52,7 @@ namespace WpfApp.Utils
     }
 
     /// <summary>
-    /// BoolToVisibility反転変換処理
+    /// 反転BoolToVisibility変換処理
     /// </summary>
     /// @note 変換処理は BooleanToVisibilityConverter の反転
     public class InverseBoolToVisibilityConverter : IValueConverter

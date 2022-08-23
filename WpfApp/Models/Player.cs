@@ -18,7 +18,7 @@ namespace WpfApp.Models
     /// <summary>
     /// ランダム戦略プレイヤー
     /// </summary>
-    /// 置石可能位置をランダムで返す。評価選択肢対象外。
+    /// 置石位置をランダムで返す。評価選択肢対象外。
     internal class PlayerRand : IOthelloPlayer
     {
         public string Name { get; set; } = "ランダム";
@@ -145,62 +145,6 @@ namespace WpfApp.Models
 
         public int Count { get; set; } = ToolsMC.DEFAULT_COUNT;
         public double Param { get; set; } = ToolsMC.DEFAULT_PARAM;
-    }
-
-    /// <summary>
-    /// Accord DBN戦略プレイヤー
-    /// </summary>
-    /// Accord DBNで置石位置を計算。
-    internal class PlayerAccord : IOthelloPlayer
-    {
-        public string Name { get; set; } = "Accord DBN";
-        public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
-        public ulong Calc(ulong p, ulong o)
-        {
-            // Scoreは盤面全体が対象のため合法手抽出が必要
-            var d = Score(p, o);
-            var lm = Tools.LegalMove(p, o);
-            for (int i = 0; i < 64; i++)
-            {
-                if ((lm & Tools.Pos2Bit(i)) == 0)
-                {
-                    d[i] = double.NaN;
-                }
-            }
-            var r = d.Where(n => !double.IsNaN(n));
-            return (r.Count() == 0) ? 0 : Tools.Pos2Bit(System.Array.IndexOf(d, r.Max()));
-        }
-        public double[] Score(ulong p, ulong o) => ToolsMLAccord.Compute(p, o, Param);
-
-        public int Param { get; set; } = 0;
-    }
-
-    /// <summary>
-    /// Kelp MLP戦略プレイヤー
-    /// </summary>
-    /// Kelp MLPで置石位置を計算。
-    internal class PlayerKelp : IOthelloPlayer
-    {
-        public string Name { get; set; } = "Kelp MLP";
-        public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, "");
-        public ulong Calc(ulong p, ulong o)
-        {
-            // Scoreは盤面全体が対象のため合法手抽出が必要
-            var d = Score(p, o);
-            var lm = Tools.LegalMove(p, o);
-            for (int i = 0; i < 64; i++)
-            {
-                if ((lm & Tools.Pos2Bit(i)) == 0)
-                {
-                    d[i] = double.NaN;
-                }
-            }
-            var r = d.Where(n => !double.IsNaN(n));
-            return (r.Count() == 0) ? 0 : Tools.Pos2Bit(System.Array.IndexOf(d, r.Max()));
-        }
-        public double[] Score(ulong p, ulong o) => ToolsMLKelp.Compute(p, o, Param);
-
-        public int Param { get; set; } = 0;
     }
 
 }

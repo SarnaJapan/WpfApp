@@ -18,7 +18,7 @@ namespace WpfLibPlayerV1
         public static List<int> GetFlip(int color, int[] data, int pos)
         {
             var res = new HashSet<int>();
-            if (pos < 0 || pos >= data.Length || data[pos] != Common.NULL)
+            if (pos < 0 || pos >= data.Length || data[pos] != Common.EMPTY)
             {
                 return res.ToList();
             }
@@ -104,7 +104,7 @@ namespace WpfLibPlayerV1
             int p1 = Common.SIZE / 2 - 1;
             int p2 = Common.SIZE / 2;
 
-            for (int i = 0; i < data.Length; i++) { data[i] = Common.NULL; }
+            for (int i = 0; i < data.Length; i++) { data[i] = Common.EMPTY; }
             data[p1 * Common.SIZE + p1] = Common.WHITE;
             data[p1 * Common.SIZE + p2] = Common.BLACK;
             data[p2 * Common.SIZE + p1] = Common.BLACK;
@@ -168,7 +168,7 @@ namespace WpfLibPlayerV1
                     if (y + dy >= 0 && y + dy < Common.SIZE && x + dx >= 0 && x + dx < Common.SIZE)
                     {
                         // 空白数追加
-                        if (data[(y + dy) * Common.SIZE + (x + dx)] == Common.NULL)
+                        if (data[(y + dy) * Common.SIZE + (x + dx)] == Common.EMPTY)
                         {
                             res++;
                         }

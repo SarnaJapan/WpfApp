@@ -142,7 +142,7 @@ namespace WpfLibPlayer
             }
 
             /// <summary>
-            /// 試行
+            /// 試行処理
             /// </summary>
             public void Action()
             {

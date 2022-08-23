@@ -21,7 +21,7 @@ namespace WpfApp.Models
 
         /// @name 石色
         ///@{
-        public const int NULL = 0;
+        public const int EMPTY = 0;
         public const int BLACK = 1;
         public const int WHITE = -1;
         ///@}
@@ -74,56 +74,6 @@ namespace WpfApp.Models
         /// 疑似乱数ジェネレータ
         /// </summary>
         public static System.Random R = new System.Random();
-
-        /// @name コマンド種別
-        ///@{
-        public const string TEST_CREATE = "棋譜生成(->log_vs)";
-        public const string TEST_CONVERT = "棋譜変換(->log_wt)";
-        public const string TEST_CHECK = "棋譜確認(->log_ok)";
-        public const string TEST_SEARCH = "MCTSパラメータ探索";
-        public const string TEST_TRAIN_NW = "Train Network (Accord)";
-        public const string TEST_REINFORCE = "Reinforce (Accord)";
-        public const string TEST_TRAIN_NW_KELP = "Train Network (Kelp)";
-        public const string TEST_REINFORCE_KELP = "Reinforce (Kelp)";
-        // @todo 実験用のため修正予定
-        public const string TEST_TRAIN_NW_KELP0 = "Train Network 00 (Kelp)";
-        public const string TEST_TRAIN_NW_KELP1 = "Train Network 01 (Kelp)";
-        public const string TEST_TRAIN_NW_KELP2 = "Train Network 02 (Kelp)";
-        public const string TEST_TRAIN_NW_KELP3 = "Train Network 03 (Kelp)";
-        // @todo 実験用のため修正予定
-        ///@}
-
-        /// <summary>
-        /// 実験処理
-        /// </summary>
-        /// <param name="progress"></param>
-        /// <param name="token"></param>
-        /// <param name="param"></param>
-        /// <returns>処理時間</returns>
-        public static string TestCommandBase(System.IProgress<string> progress, CancellationToken token, object[] param)
-        {
-            // パラメータ確認
-            int timeout;
-            try
-            {
-                timeout = int.Parse((string)param[0]);
-            }
-            catch (System.Exception)
-            {
-                return "Invalid parameter.";
-            }
-
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            for (int i = 0; i < 100 && !token.IsCancellationRequested; i++)
-            {
-                Thread.Sleep(timeout);
-                progress.Report($"{i}");
-            }
-            sw.Stop();
-
-            return $"{sw.ElapsedMilliseconds} ms";
-        }
 
         /// <summary>
         /// 実験処理

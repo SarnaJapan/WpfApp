@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace WpfApp.Models
 {
@@ -144,7 +142,7 @@ namespace WpfApp.Models
             }
 
             /// <summary>
-            /// 試行
+            /// 試行処理
             /// </summary>
             public void Action()
             {
@@ -153,7 +151,7 @@ namespace WpfApp.Models
                 // 既存ノード選択
                 TreeNode cur = this;
                 visited.Add(cur);
-                while (cur?.children.Count > 0)
+                while (cur.children.Count > 0)
                 {
                     cur = cur.Select();
                     if (cur != null)
@@ -164,8 +162,8 @@ namespace WpfApp.Models
 
                 // 末端ノード展開
                 TreeNode add = null;
-                cur?.Expand();
-                if (cur?.children.Count > 0)
+                cur.Expand();
+                if (cur.children.Count > 0)
                 {
                     add = cur.Select();
                     if (add != null)
@@ -319,73 +317,6 @@ namespace WpfApp.Models
             } while (sp != 0 || so != 0);
 
             return Tools.BitCount(p) - Tools.BitCount(o);
-        }
-
-        #endregion
-
-        #region 実験
-
-        /// <summary>
-        /// MCTSパラメータ探索結果
-        /// </summary>
-        private static readonly string FILE_PARAM = "mcts_param.txt";
-
-        /// <summary>
-        /// MCTSパラメータ探索処理
-        /// </summary>
-        /// <param name="progress"></param>
-        /// <param name="token"></param>
-        /// <param name="param">[string path]</param>
-        /// <returns>処理時間</returns>
-        public static string SearchParam(System.IProgress<string> progress, CancellationToken token, object[] param)
-        {
-            // パラメータ確認
-            string path;
-            try
-            {
-                path = (string)param[0];
-            }
-            catch (System.Exception)
-            {
-                return "Invalid parameter.";
-            }
-
-            var mc = new PlayerMC();
-            var mcts = new PlayerMCTS();
-            var sw = new System.Diagnostics.Stopwatch();
-            var buf = new List<string>();
-            try
-            {
-                sw.Start();
-                for (int j = 0; j <= 100 && !token.IsCancellationRequested; j++)
-                {
-                    mcts.Param = 0.01 * j;
-                    int[] resp = { 0, 0, 0, };
-                    int[] reso = { 0, 0, 0, };
-                    for (int i = 0; i < 100 && !token.IsCancellationRequested; i++)
-                    {
-                        int rp = Tools.Playout(mc, mcts, Common.BB_BLACK, Common.BB_WHITE);
-                        resp[(rp > 0) ? 1 : (rp < 0) ? 2 : 0]++;
-                        int ro = Tools.Playout(mcts, mc, Common.BB_BLACK, Common.BB_WHITE);
-                        reso[(ro > 0) ? 1 : (ro < 0) ? 2 : 0]++;
-
-                        progress.Report($"C={mcts.Param}, N={i}");
-                    }
-                    buf.Add($"{mcts.Param},{resp[1]},{resp[0]},{resp[2]},{reso[1]},{reso[0]},{reso[2]}");
-                }
-                sw.Stop();
-            }
-            catch (System.Exception ex)
-            {
-                return ex.Message;
-            }
-            buf.Insert(0, $"C,White-Lose,Draw,White-Win,Black-Win,Draw,Black-Lose,Playout={mcts.Count}");
-            if (!Common.SaveLogList(Path.Combine(path, FILE_PARAM), buf))
-            {
-                return "Save failed.";
-            }
-
-            return $"{sw.ElapsedMilliseconds} ms";
         }
 
         #endregion

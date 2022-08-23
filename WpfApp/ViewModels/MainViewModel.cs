@@ -70,7 +70,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         private string lastColor = "";
         /// <summary>
-        /// 最新位置色
+        /// 更新色
         /// </summary>
         public string LastColor
         {
@@ -88,10 +88,10 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// <see cref="this[int id]"/>
         /// </summary>
-        /// @note [(文字色＆文字列),(情報数)]のインデクサを定義する。ビューと一致させること。
+        /// @note インデクサは[(文字色,文字列),情報数]の構成。ビューと一致させること。
         private readonly string[] info = new string[] { "White", "", "White", "", "White", "", "White", "", };
         /// <summary>
-        /// 情報用インデクサ
+        /// インデクサ
         /// </summary>
         public string this[int id]
         {
@@ -119,10 +119,11 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// ゲームマスター
         /// </summary>
+        /// メインモデルとして起動時に生成する
 #if MODE_V1
-        private readonly MasterV1 Master;
+        private readonly MasterV1 Master = new MasterV1();
 #else
-        private readonly Master Master;
+        private readonly Master Master = new Master();
 #endif
 
         /// <summary>
@@ -131,16 +132,14 @@ namespace WpfApp.ViewModels
         public Stone[] Data { get; set; } = new Stone[Common.SIZE * Common.SIZE];
 
         /// <summary>
-        /// ゲームマスターと石データの初期設定
+        /// コンストラクタ：ゲームマスターと石データの初期設定
         /// </summary>
+        /// - 変更通知イベントハンドラ登録
+        ///   - 各データをモデル用からビュー用に変換する処理を登録する
+        /// - 関連ビューモデル生成
+        ///   - 盤(@ref Board)が所有する石(@ref Stone)を生成する
         public Board()
         {
-            // ゲームマスター生成：モデルインスタンスを保持する
-#if MODE_V1
-            Master = new MasterV1();
-#else
-            Master = new Master();
-#endif
             Master.PropertyChanged += BackPropertyChanged;
             Master.PropertyChanged += DataPropertyChanged;
             Master.PropertyChanged += InfoPropertyChanged;
@@ -150,7 +149,7 @@ namespace WpfApp.ViewModels
             {
                 for (int j = 0; j < Common.SIZE; j++)
                 {
-                    Data[i * Common.SIZE + j] = new Stone { RowIndex = i, ColumnIndex = j, Color = "Transparent", BackColor = "Green", LastColor = "Transparent", };
+                    Data[i * Common.SIZE + j] = new Stone { RowIndex = i, ColumnIndex = j, BackColor = "Green", Color = "Transparent", LastColor = "Transparent", };
                 }
             }
         }
@@ -194,9 +193,7 @@ namespace WpfApp.ViewModels
                 if (value != isBusy)
                 {
                     isBusy = value;
-                    // 情報表示、設定表示、開始、選択の同時起動を抑止
-                    InfoCommand.RaiseCanExecuteChanged();
-                    CtrlCommand.RaiseCanExecuteChanged();
+                    // 開始、選択の同時起動を抑止
                     StartCommand.RaiseCanExecuteChanged();
                     SelectCommand.RaiseCanExecuteChanged();
                 }
@@ -256,7 +253,6 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand OnCloseInfoCommand => onCloseInfoCommand ?? (onCloseInfoCommand = new DelegateCommand(_ =>
         {
-            System.Diagnostics.Debug.WriteLine("-> OnCloseInfoCommand()");
         },
         _ =>
         {
@@ -272,13 +268,12 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand OnCloseCtrlCommand => onCloseCtrlCommand ?? (onCloseCtrlCommand = new DelegateCommand(_ =>
         {
-            System.Diagnostics.Debug.WriteLine("-> OnCloseCtrlCommand()");
             // 設定変更反映
             Master.SetBack(true);
             Master.SetInfo(true);
             Master.SetTitle(Common.TITLE_PLAYER);
             // 起動中タスクキャンセル
-            CtrlViewModel.CancelCommand.Execute(null);
+            CtrlViewModel?.CancelCommand.Execute(null);
         },
         _ =>
         {
@@ -286,43 +281,35 @@ namespace WpfApp.ViewModels
         }));
 
         /// <summary>
-        /// <see cref="InfoCommand"/>
+        /// <see cref="OpenInfoCommand"/>
         /// </summary>
-        private DelegateCommand infoCommand;
+        private DelegateCommand openInfoCommand;
         /// <summary>
         /// 情報表示コマンド
         /// </summary>
-        public DelegateCommand InfoCommand => infoCommand ?? (infoCommand = new DelegateCommand(_ =>
+        public DelegateCommand OpenInfoCommand => openInfoCommand ?? (openInfoCommand = new DelegateCommand(_ =>
         {
-            System.Diagnostics.Debug.WriteLine("-> InfoCommand() start");
-            IsBusy = true;
             InfoViewModel = new InfoViewModel();
-            System.Diagnostics.Debug.WriteLine("-> InfoCommand() end");
-            IsBusy = false;
         },
         _ =>
         {
-            return !IsBusy;
+            return true;
         }));
 
         /// <summary>
-        /// <see cref="CtrlCommand"/>
+        /// <see cref="OpenCtrlCommand"/>
         /// </summary>
-        private DelegateCommand ctrlCommand;
+        private DelegateCommand openCtrlCommand;
         /// <summary>
         /// 設定表示コマンド
         /// </summary>
-        public DelegateCommand CtrlCommand => ctrlCommand ?? (ctrlCommand = new DelegateCommand(_ =>
+        public DelegateCommand OpenCtrlCommand => openCtrlCommand ?? (openCtrlCommand = new DelegateCommand(_ =>
         {
-            System.Diagnostics.Debug.WriteLine("-> CtrlCommand() start");
-            IsBusy = true;
             CtrlViewModel = new CtrlViewModel(Master);
-            System.Diagnostics.Debug.WriteLine("-> CtrlCommand() end");
-            IsBusy = false;
         },
         _ =>
         {
-            return !IsBusy;
+            return true;
         }));
 
         /// <summary>
@@ -370,6 +357,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         /// <param name="sender">送信元</param>
         /// <param name="e">イベント</param>
+        /// 通知された合法手の配列を基に背景色を設定する
         private void BackPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (!"Back".Equals(e.PropertyName))
@@ -396,6 +384,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         /// <param name="sender">送信元</param>
         /// <param name="e">イベント</param>
+        /// 通知された配列と既存の石色を基に石色と更新色を設定する
         private void DataPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (!"Data".Equals(e.PropertyName))
@@ -413,19 +402,25 @@ namespace WpfApp.ViewModels
             }
             for (int i = 0; i < Data.Length; i++)
             {
+                // 連続更新時に更新色が残り反転処理が重複するため消去すること。
+                Data[i].LastColor = "Transparent";
+                // 新規なら更新色を着手色に設定。反転なら更新色をダミーに設定。
+                // 反転用データトリガ判定のため、石色->更新色の順序とすること。
                 switch (p.Data[i])
                 {
                     case Common.BLACK:
-                        Data[i].LastColor = (Data[i].Color == "Transparent") ? "Gray" : "Transparent";
+                        string b = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "White") ? "Red" : "Transparent";
                         Data[i].Color = "Black";
+                        Data[i].LastColor = b;
                         break;
                     case Common.WHITE:
-                        Data[i].LastColor = (Data[i].Color == "Transparent") ? "Gray" : "Transparent";
+                        string w = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "Black") ? "Red" : "Transparent";
                         Data[i].Color = "White";
+                        Data[i].LastColor = w;
                         break;
                     default:
-                        Data[i].LastColor = "Transparent";
                         Data[i].Color = "Transparent";
+                        Data[i].LastColor = "Transparent";
                         break;
                 }
             }
@@ -436,7 +431,8 @@ namespace WpfApp.ViewModels
         /// </summary>
         /// <param name="sender">送信元</param>
         /// <param name="e">イベント</param>
-        /// @note [(文字色＆文字列),(情報数),(石数)]のパラメータを変換する。ビューと一致させること。
+        /// 通知された各種情報用の配列をインデクサに変換する
+        /// @note 配列は[((文字色,文字列),情報数),石数]の構成。ビューと一致させること。
         private void InfoPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (!"Info".Equals(e.PropertyName))
@@ -466,6 +462,7 @@ namespace WpfApp.ViewModels
         /// </summary>
         /// <param name="sender">送信元</param>
         /// <param name="e">イベント</param>
+        /// 通知された文字列をそのままタイトルに設定する
         private void TitlePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (!"Title".Equals(e.PropertyName))

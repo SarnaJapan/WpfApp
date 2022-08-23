@@ -20,7 +20,7 @@ namespace WpfApp.Models
         public static List<int> GetFlip(int color, int[] data, int pos)
         {
             var res = new HashSet<int>();
-            if (pos < 0 || pos >= data.Length || data[pos] != Common.NULL)
+            if (pos < 0 || pos >= data.Length || data[pos] != Common.EMPTY)
             {
                 return res.ToList();
             }
@@ -103,7 +103,7 @@ namespace WpfApp.Models
             int p1 = Common.SIZE / 2 - 1;
             int p2 = Common.SIZE / 2;
 
-            for (int i = 0; i < data.Length; i++) { data[i] = Common.NULL; }
+            for (int i = 0; i < data.Length; i++) { data[i] = Common.EMPTY; }
             data[p1 * Common.SIZE + p1] = Common.WHITE;
             data[p1 * Common.SIZE + p2] = Common.BLACK;
             data[p2 * Common.SIZE + p1] = Common.BLACK;
@@ -167,7 +167,7 @@ namespace WpfApp.Models
                         return;
                     }
                     // 空白数追加
-                    if (data[p + d] == Common.NULL)
+                    if (data[p + d] == Common.EMPTY)
                     {
                         res++;
                     }

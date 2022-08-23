@@ -222,15 +222,15 @@ namespace WpfApp.Utils
         /// <summary>
         /// プロパティ変更処理
         /// </summary>
-        /// <param name="d"></param>
-        /// <param name="e"></param>
-        private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        /// <param name="obj"></param>
+        /// <param name="args"></param>
+        private static void OnPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            if (!(d is Window win))
+            if (!(obj is Window win))
             {
-                win = Window.GetWindow(d);
+                win = Window.GetWindow(obj);
             }
-            if (GetClose(d))
+            if (GetClose(obj))
             {
                 win.Close();
             }

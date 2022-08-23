@@ -6,8 +6,9 @@ using WpfLib.OthelloInterface;
 namespace WpfApp.Models
 {
     /// <summary>
-    /// ゲームマスター：プレイヤーとゲーム進行を管理する
+    /// ゲームマスター
     /// </summary>
+    /// プレイヤーとゲーム進行を管理する
     public class Master : NotificationObject
     {
         /// <summary>
@@ -56,14 +57,12 @@ namespace WpfApp.Models
         private ulong BO;
 
         /// <summary>
-        /// コンストラクタ：プレイヤーを登録する
+        /// コンストラクタ：プレイヤーの登録
         /// </summary>
         public Master()
         {
             var playerlist = new List<IOthelloPlayer>() { new PlayerNull(), new PlayerRand(), new PlayerMaxCount(), new PlayerMinOpen(),
-                new PlayerMC(), new PlayerMCTS(), new PlayerAccord(), new PlayerKelp(),
-                /// @todo 実験用のため修正予定
-                new PlayerKelp() { Name = "Kelp 00", Param = 0 }, new PlayerKelp() { Name = "Kelp 01", Param = 1 }, new PlayerKelp() { Name = "Kelp 02", Param = 2 }, new PlayerKelp() { Name = "Kelp 03", Param = 3 }, };
+                new PlayerMC(), new PlayerMCTS(), };
             // デフォルトプレイヤー登録
             foreach (var item in playerlist)
             {
@@ -92,7 +91,7 @@ namespace WpfApp.Models
             BO = Common.BB_WHITE;
             SetBack(false);
             SetData();
-            // 最新位置表示削除
+            // 更新色表示削除
             SetData();
             SetInfo(false);
             SetTitle(Common.TITLE_PLAYER);
@@ -104,7 +103,7 @@ namespace WpfApp.Models
         /// <param name="pos">クリック位置</param>
         public void GameSelectPos(int pos)
         {
-            if (Turn != Common.NULL)
+            if (Turn != Common.EMPTY)
             {
                 // 合法手があるなら
                 var lm = Tools.LegalMove(BP, BO);
@@ -139,7 +138,9 @@ namespace WpfApp.Models
         {
             // ターン交替
             Turn *= -1;
-            (BO, BP) = (BP, BO);
+            var temp = BP;
+            BP = BO;
+            BO = temp;
             SetBack(false);
             SetData();
             SetInfo(false);
@@ -153,7 +154,7 @@ namespace WpfApp.Models
                 if (pass)
                 {
                     SetTitle(Common.TITLE_RESULT);
-                    Turn = Common.NULL;
+                    Turn = Common.EMPTY;
                 }
             }
 
@@ -188,9 +189,10 @@ namespace WpfApp.Models
         /// タイトル設定
         /// </summary>
         /// <param name="type">タイトル種別</param>
+        /// 各種状況をタイトルとしてまとめて通知する
         public void SetTitle(int type)
         {
-            if (Turn != Common.NULL)
+            if (Turn != Common.EMPTY)
             {
                 switch (type)
                 {
@@ -236,6 +238,7 @@ namespace WpfApp.Models
         /// <summary>
         /// 石色設定
         /// </summary>
+        /// 盤面をBitBoardから配列に変換して通知する
         private void SetData()
         {
             switch (Turn)
@@ -274,6 +277,7 @@ namespace WpfApp.Models
         /// 背景色設定
         /// </summary>
         /// <param name="forced">強制設定</param>
+        /// 合法手を背景色情報用の配列として通知する
         public void SetBack(bool forced)
         {
             if (ShowCandidate)
@@ -298,7 +302,7 @@ namespace WpfApp.Models
         /// </summary>
         private string[] info = new string[64 * 8];
         /// <summary>
-        /// 情報
+        /// 各種情報
         /// </summary>
         public string[] Info
         {
@@ -311,14 +315,15 @@ namespace WpfApp.Models
         }
 
         /// <summary>
-        /// 情報設定
+        /// 各種情報設定
         /// </summary>
         /// <param name="forced">強制設定</param>
+        /// 評価値を各種情報用の配列に変換して通知する
         public void SetInfo(bool forced)
         {
             if (forced)
             {
-                // 評価値なしに変更時は初期化
+                // 設定変更時は初期化
                 for (int i = 0; i < 64; i++)
                 {
                     info[8 * i + 0] = "White";

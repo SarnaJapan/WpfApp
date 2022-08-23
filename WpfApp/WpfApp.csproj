@@ -6,29 +6,7 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Accord" Version="3.8.0" />
-    <PackageReference Include="Accord.Genetic" Version="3.8.0" />
-    <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
-    <PackageReference Include="Accord.Math" Version="3.8.0" />
-    <PackageReference Include="Accord.Neuro" Version="3.8.0" />
-    <PackageReference Include="Accord.Statistics" Version="3.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\KelpNet\KelpNet.CL.Common\KelpNet.CL.Common.csproj" />
-    <ProjectReference Include="..\KelpNet\KelpNet.CL.Function\KelpNet.CL.Function.csproj" />
-    <ProjectReference Include="..\KelpNet\KelpNet.Common\KelpNet.Common.csproj" />
-    <ProjectReference Include="..\KelpNet\KelpNet.Function\KelpNet.Function.csproj" />
-    <ProjectReference Include="..\KelpNet\KelpNet.Tools\KelpNet.Tools.csproj" />
     <ProjectReference Include="..\WpfLib\WpfLib.csproj" />
   </ItemGroup>
 

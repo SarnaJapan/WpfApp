@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:WpfApp.Views"
              xmlns:localU="clr-namespace:WpfApp.Utils"
              mc:Ignorable="d"
-             Height="500" Width="380"
+             Height="300" Width="380"
              localU:CloseWindowBehavior.Close="{Binding CloseWindow}">
 
     <UserControl.Resources>
@@ -27,9 +27,6 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -79,52 +76,12 @@
             </TextBox>
         </StackPanel>
 
-        <ListView Grid.Row="6" Grid.Column="1" Margin="4,7,12,10" Height="107" ItemsSource="{Binding PlayerInfoList}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn>
-                        <GridViewColumnHeader Content="名称" />
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Label Padding="0" Content="{Binding Path=Name}" Width="132" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn>
-                        <GridViewColumnHeader Content="版数" />
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Label Padding="0" Content="{Binding Path=Version}" Width="105" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
-
-        <StackPanel Grid.Row="7" Grid.Column="1" Margin="0,4,0,4" Orientation="Horizontal">
-            <ComboBox Margin="4" Width="140" Height="26" ItemsSource="{Binding TestList}" SelectedValue="{Binding TestType}" />
-            <Button Margin="4" Width="66" Height="26" Content="実行" Command="{Binding TestCommand}" CommandParameter="" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="8" Grid.Column="1" Margin="0,6,0,0" Orientation="Horizontal">
-            <TextBox Margin="4" Width="288" Height="20" ToolTip="ログディレクトリ" Validation.ErrorTemplate="{StaticResource ValidationTemplate}">
-                <TextBox.Text>
-                    <Binding Path="LogDir" UpdateSourceTrigger="LostFocus">
-                        <Binding.ValidationRules>
-                            <localU:PathValidationRule />
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox.Text>
-            </TextBox>
-        </StackPanel>
-
-        <StackPanel Grid.Row="10" Grid.Column="1" Margin="148,8,0,8" Orientation="Horizontal">
+        <StackPanel Grid.Row="7" Grid.Column="1" Margin="148,8,0,8" Orientation="Horizontal">
             <Button Margin="4" Width="66" Height="26" Content="中断" Command="{Binding CancelCommand}" />
             <Button Margin="4" Width="66" Height="26" Content="終了" Command="{Binding CloseCommand}" />
         </StackPanel>
 
-        <StatusBar Grid.Row="11" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+        <StatusBar Grid.Row="8" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
             <Label Content="{Binding Status}" />
             <Label Content="" />
         </StatusBar>

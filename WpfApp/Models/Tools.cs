@@ -105,7 +105,7 @@ namespace WpfApp.Models
             for (int i = 0; i < 64; i++)
             {
                 var t = Pos2Bit(i);
-                data[i] = Common.NULL;
+                data[i] = Common.EMPTY;
                 if ((p & t) != 0)
                 {
                     data[i] = Common.BLACK;

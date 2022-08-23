@@ -59,19 +59,18 @@
             <ColumnDefinition Width="24" />
             <ColumnDefinition Width="514" />
         </Grid.ColumnDefinitions>
-
-        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-            <Label Width="64" Content="a" Margin="24,-2,0,0" />
-            <Label Width="64" Content="b" Margin="0,-2,0,0" />
-            <Label Width="64" Content="c" Margin="0,-2,0,0" />
-            <Label Width="64" Content="d" Margin="0,-2,0,0" />
-            <Label Width="64" Content="e" Margin="0,-2,0,0" />
-            <Label Width="64" Content="f" Margin="0,-2,0,0" />
-            <Label Width="64" Content="g" Margin="0,-2,0,0" />
-            <Label Width="64" Content="h" Margin="0,-2,0,0" />
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="24,-2,0,0" Orientation="Horizontal">
+            <Label Width="64" Content="a" />
+            <Label Width="64" Content="b" />
+            <Label Width="64" Content="c" />
+            <Label Width="64" Content="d" />
+            <Label Width="64" Content="e" />
+            <Label Width="64" Content="f" />
+            <Label Width="64" Content="g" />
+            <Label Width="64" Content="h" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0">
-            <Label Height="64" Content="1" HorizontalAlignment="Center" Margin="0,20,0,0" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
+            <Label Height="64" Content="1" HorizontalAlignment="Center" />
             <Label Height="64" Content="2" HorizontalAlignment="Center" />
             <Label Height="64" Content="3" HorizontalAlignment="Center" />
             <Label Height="64" Content="4" HorizontalAlignment="Center" />
@@ -81,50 +80,67 @@
             <Label Height="64" Content="8" HorizontalAlignment="Center" />
         </StackPanel>
         <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="1">
-            <ItemsControl ItemsSource="{Binding Path=Data}">
+            <Border.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="開始" Command="{Binding StartCommand}" />
+                    <Separator />
+                    <MenuItem Header="設定" Command="{Binding OpenCtrlCommand}"
+                        localU:DialogBehavior.CloseCommand="{Binding OnCloseCtrlCommand}"
+                        localU:DialogBehavior.Title="設定"
+                        localU:DialogBehavior.Content="{Binding CtrlViewModel}"
+                        localU:DialogBehavior.Template="{StaticResource CtrlView}" />
+                    <MenuItem Header="情報" Command="{Binding OpenInfoCommand}"
+                        localU:DialogBehavior.CloseCommand="{Binding OnCloseInfoCommand}"
+                        localU:DialogBehavior.Title="情報"
+                        localU:DialogBehavior.Content="{Binding InfoViewModel}"
+                        localU:DialogBehavior.Template="{StaticResource InfoView}" />
+                </ContextMenu>
+            </Border.ContextMenu>
+            <ItemsControl ItemsSource="{Binding Data}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid ShowGridLines="False">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
                         </Grid>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemContainerStyle>
                     <Style>
-                        <Setter Property="Grid.Column" Value="{Binding Path=ColumnIndex}" />
-                        <Setter Property="Grid.Row" Value="{Binding Path=RowIndex}" />
+                        <Setter Property="Grid.Column" Value="{Binding ColumnIndex}" />
+                        <Setter Property="Grid.Row" Value="{Binding RowIndex}" />
                     </Style>
                 </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Rectangle Fill="{Binding Path=BackColor}" />
-                            <Ellipse Margin="5" Fill="{Binding Path=Color}" />
-                            <Ellipse Margin="26" Fill="{Binding Path=LastColor}" />
-                            <TextBlock Margin="4,0,4,0" Foreground="{Binding Path=[0]}" Text="{Binding Path=[1]}" />
-                            <TextBlock Margin="4,15,4,0" Foreground="{Binding Path=[2]}" Text="{Binding Path=[3]}" />
-                            <TextBlock Margin="4,30,4,0" Foreground="{Binding Path=[4]}" Text="{Binding Path=[5]}" />
-                            <TextBlock Margin="4,45,4,0" Foreground="{Binding Path=[6]}" Text="{Binding Path=[7]}" />
-                            <Button Command="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.SelectCommand}" Style="{StaticResource GridButtonStyle}">
+                            <Rectangle Fill="{Binding BackColor}" />
+                            <Ellipse Name="main" Margin="5" Fill="{Binding Color}" />
+                            <Ellipse Name="last" Margin="26" Fill="{Binding LastColor}" />
+                            <TextBlock Margin="4,0,4,0" Foreground="{Binding [0]}" Text="{Binding [1]}" />
+                            <TextBlock Margin="4,15,4,0" Foreground="{Binding [2]}" Text="{Binding [3]}" />
+                            <TextBlock Margin="4,30,4,0" Foreground="{Binding [4]}" Text="{Binding [5]}" />
+                            <TextBlock Margin="4,45,4,0" Foreground="{Binding [6]}" Text="{Binding [7]}" />
+                            <!-- 個々のアイテム(Stone)ではなく親(Window)のデータコンテキスト(Board)を指定する -->
+                            <Button Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" Style="{StaticResource GridButtonStyle}">
                                 <Button.CommandParameter>
                                     <MultiBinding Converter="{StaticResource PositionConverter}">
                                         <Binding Path="ColumnIndex" />
@@ -133,25 +149,92 @@
                                 </Button.CommandParameter>
                             </Button>
                         </Grid>
+
+                        <DataTemplate.Triggers>
+                            <!-- 黒白反転アニメーション -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Color}" Value="White" />
+                                    <Condition Binding="{Binding LastColor}" Value="Red" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.EnterActions>
+                                    <BeginStoryboard Name="b2w">
+                                        <Storyboard>
+                                            <ParallelTimeline>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="(FrameworkElement.Width)"
+                                                    Storyboard.TargetName="main"
+                                                    Duration="0:0:0.2" From="54" To="0" AutoReverse="True" FillBehavior="Stop" />
+                                                <ColorAnimationUsingKeyFrames
+                                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                    Storyboard.TargetName="main"
+                                                    Duration="0:0:0.4" FillBehavior="Stop">
+                                                    <DiscreteColorKeyFrame Value="Black" KeyTime="0:0:0.0" />
+                                                    <DiscreteColorKeyFrame Value="White" KeyTime="0:0:0.2" />
+                                                </ColorAnimationUsingKeyFrames>
+                                                <ColorAnimationUsingKeyFrames
+                                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                    Storyboard.TargetName="last"
+                                                    Duration="0:0:0.4" FillBehavior="Stop">
+                                                    <DiscreteColorKeyFrame Value="Transparent" KeyTime="0:0:0.0" />
+                                                </ColorAnimationUsingKeyFrames>
+                                            </ParallelTimeline>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiDataTrigger.EnterActions>
+                                <MultiDataTrigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="b2w" />
+                                </MultiDataTrigger.ExitActions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter TargetName="main" Property="Width" Value="54" />
+                                    <Setter TargetName="main" Property="Fill" Value="White" />
+                                    <Setter TargetName="last" Property="Fill" Value="Transparent" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                            <!-- 白黒反転アニメーション -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Color}" Value="Black" />
+                                    <Condition Binding="{Binding LastColor}" Value="Red" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.EnterActions>
+                                    <BeginStoryboard Name="w2b">
+                                        <Storyboard>
+                                            <ParallelTimeline>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="(FrameworkElement.Width)"
+                                                    Storyboard.TargetName="main"
+                                                    Duration="0:0:0.2" From="54" To="0" AutoReverse="True" FillBehavior="Stop" />
+                                                <ColorAnimationUsingKeyFrames
+                                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                    Storyboard.TargetName="main"
+                                                    Duration="0:0:0.4" FillBehavior="Stop">
+                                                    <DiscreteColorKeyFrame Value="White" KeyTime="0:0:0.0" />
+                                                    <DiscreteColorKeyFrame Value="Black" KeyTime="0:0:0.2" />
+                                                </ColorAnimationUsingKeyFrames>
+                                                <ColorAnimationUsingKeyFrames
+                                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                                    Storyboard.TargetName="last"
+                                                    Duration="0:0:0.4" FillBehavior="Stop">
+                                                    <DiscreteColorKeyFrame Value="Transparent" KeyTime="0:0:0.0" />
+                                                </ColorAnimationUsingKeyFrames>
+                                            </ParallelTimeline>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiDataTrigger.EnterActions>
+                                <MultiDataTrigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="w2b" />
+                                </MultiDataTrigger.ExitActions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter TargetName="main" Property="Width" Value="54" />
+                                    <Setter TargetName="main" Property="Fill" Value="Black" />
+                                    <Setter TargetName="last" Property="Fill" Value="Transparent" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Border.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="開始" Command="{Binding Path=StartCommand}" />
-                    <Separator />
-                    <MenuItem Header="設定" Command="{Binding Path=CtrlCommand}"
-                    localU:DialogBehavior.CloseCommand="{Binding OnCloseCtrlCommand}"
-                    localU:DialogBehavior.Title="設定"
-                    localU:DialogBehavior.Content="{Binding Path=CtrlViewModel}"
-                    localU:DialogBehavior.Template="{StaticResource CtrlView}" />
-                    <MenuItem Header="情報" Command="{Binding Path=InfoCommand}"
-                    localU:DialogBehavior.CloseCommand="{Binding OnCloseInfoCommand}"
-                    localU:DialogBehavior.Title="情報"
-                    localU:DialogBehavior.Content="{Binding Path=InfoViewModel}"
-                    localU:DialogBehavior.Template="{StaticResource InfoView}" />
-                </ContextMenu>
-            </Border.ContextMenu>
         </Border>
     </Grid>
 

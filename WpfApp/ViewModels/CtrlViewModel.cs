@@ -2,7 +2,6 @@
 // #define MODE_V1
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,8 +17,9 @@ namespace WpfApp.ViewModels
     public class CtrlViewModel : NotificationObject
     {
         /// <summary>
-        /// ゲームマスター：設定対象モデルへの参照を起動時に設定
+        /// ゲームマスター
         /// </summary>
+        /// 設定対象として呼出時に参照先を指定する
 #if MODE_V1
         private readonly MasterV1 Master;
 #else
@@ -27,9 +27,11 @@ namespace WpfApp.ViewModels
 #endif
 
         /// <summary>
-        /// コンストラクタ
+        /// コンストラクタ：プレイヤー関連選択肢の設定
         /// </summary>
         /// <param name="master">設定対象ゲームマスター</param>
+        /// - プレイヤーリストはゲームマスターから取得
+        /// - 評価用と対戦用の選択肢はバージョンオプションでフィルター
 #if MODE_V1
         public CtrlViewModel(MasterV1 master)
 #else
@@ -60,17 +62,6 @@ namespace WpfApp.ViewModels
             MatchPWV1 = MatchMapV1.First().Value;
             MatchPB = MatchMap.First().Value;
             MatchPW = MatchMap.First().Value;
-
-            // プレイヤー情報リスト設定
-            PlayerInfoList = new ObservableCollection<PlayerInfo>();
-            foreach (var item in MatchMapV1)
-            {
-                PlayerInfoList.Add(new PlayerInfo { Name = item.Key, Version = item.Value.Version });
-            }
-            foreach (var item in MatchMap)
-            {
-                PlayerInfoList.Add(new PlayerInfo { Name = item.Key, Version = item.Value.Version });
-            }
         }
 
         #region ダイアログ表示対応
@@ -233,10 +224,11 @@ namespace WpfApp.ViewModels
             get => modeV1;
             set
             {
-                modeV1 = value;
-                OnPropertyChanged();
-                // 共通コマンド実行可否更新（旧版戦略用フラグとコマンド種別に依存）
-                TestCommand.RaiseCanExecuteChanged();
+                if (value != modeV1)
+                {
+                    modeV1 = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -279,48 +271,6 @@ namespace WpfApp.ViewModels
                 }
             }
         }
-
-        /// <summary>
-        /// プレイヤー情報リスト
-        /// </summary>
-        public ObservableCollection<PlayerInfo> PlayerInfoList { get; set; }
-
-        /// <summary>
-        /// コマンド種別リスト
-        /// </summary>
-        public string[] TestList { get; } = new string[] {
-            Common.TEST_CREATE, Common.TEST_CONVERT, Common.TEST_CHECK, Common.TEST_SEARCH,
-            Common.TEST_TRAIN_NW, Common.TEST_REINFORCE,
-            Common.TEST_TRAIN_NW_KELP, Common.TEST_REINFORCE_KELP,
-            /// @todo 実験用のため修正予定
-            Common.TEST_TRAIN_NW_KELP0, Common.TEST_TRAIN_NW_KELP1, Common.TEST_TRAIN_NW_KELP2, Common.TEST_TRAIN_NW_KELP3,
-        };
-
-        /// <summary>
-        /// <see cref="TestType"/>
-        /// </summary>
-        private string testType = "";
-        /// <summary>
-        /// コマンド種別
-        /// </summary>
-        public string TestType
-        {
-            get => testType;
-            set
-            {
-                testType = value;
-                OnPropertyChanged();
-                // 共通コマンド実行可否更新（旧版戦略用フラグとコマンド種別に依存）
-                TestCommand.RaiseCanExecuteChanged();
-            }
-        }
-
-        /// <summary>
-        /// ログディレクトリ
-        /// </summary>
-        /// public string LogDir { get; set; } = Common.GetAppPath(Common.LOG_DIR);
-        /// @todo デバッグ環境用
-        public string LogDir { get; set; } = @"D:\Prog\doc\WpfApp\log";
 
         #endregion
 
@@ -404,29 +354,6 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
-        /// 非同期実行
-        /// </summary>
-        /// <param name="func">処理</param>
-        /// <param name="param">パラメータ</param>
-        private async void AsyncCall(System.Func<System.IProgress<string>, CancellationToken, object[], string> func, object[] param)
-        {
-            IsBusy = true;
-            CancelTokenSource = new CancellationTokenSource();
-            Status = "開始";
-            var progress = new System.Progress<string>(i =>
-            {
-                Status = $"実行中… [{i}]";
-            });
-            var res = await Task.Run(() =>
-            {
-                return func(progress, (CancelTokenSource != null) ? CancelTokenSource.Token : new CancellationToken(false), param);
-            });
-            Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
-            CancelTokenSource = null;
-            IsBusy = false;
-        }
-
-        /// <summary>
         /// 非同期対戦
         /// </summary>
         /// <param name="func">処理</param>
@@ -452,103 +379,19 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
-        /// 非同期対戦
-        /// </summary>
-        /// <param name="func">処理</param>
-        /// <param name="pb">プレイヤー：黒</param>
-        /// <param name="pw">プレイヤー：白</param>
-        /// <param name="count">対戦回数</param>
-        /// <param name="param">パラメータ</param>
-        private async void AsyncCall<T>(System.Func<System.IProgress<string>, CancellationToken, T, T, int, string, string> func, T pb, T pw, int count, string param)
-        {
-            IsBusy = true;
-            CancelTokenSource = new CancellationTokenSource();
-            Status = "開始";
-            var progress = new System.Progress<string>(i =>
-            {
-                Status = $"対戦中… [{i}]";
-            });
-            var res = await Task.Run(() =>
-            {
-                return func(progress, (CancelTokenSource != null) ? CancelTokenSource.Token : new CancellationToken(false), pb, pw, count, param);
-            });
-            Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
-            CancelTokenSource = null;
-            IsBusy = false;
-        }
-
-        /// <summary>
         /// <see cref="TestCommand"/>
         /// </summary>
         private DelegateCommand testCommand;
         /// <summary>
         /// 共通コマンド
         /// </summary>
-        public DelegateCommand TestCommand => testCommand ?? (testCommand = new DelegateCommand(param =>
+        public DelegateCommand TestCommand => testCommand ?? (testCommand = new DelegateCommand(_ =>
         {
-            if ("".Equals(param))
-            {
-                // パラメータ指定なし
-                switch (TestType)
-                {
-                    case Common.TEST_CREATE:
-                        AsyncCall(ToolsKF.CreateLog, MatchPB, MatchPW, MatchCount, LogDir);
-                        break;
-                    case Common.TEST_CONVERT:
-                        AsyncCall(ToolsKF.ConvertLog, new object[] { LogDir });
-                        break;
-                    case Common.TEST_CHECK:
-                        AsyncCall(ToolsKF.CheckLog, new object[] { LogDir });
-                        break;
-                    case Common.TEST_SEARCH:
-                        AsyncCall(ToolsMC.SearchParam, new object[] { LogDir });
-                        break;
-                    case Common.TEST_TRAIN_NW:
-                        AsyncCall(ToolsMLAccord.TrainNetwork, new object[] { LogDir, 0 });
-                        break;
-                    case Common.TEST_REINFORCE:
-                        AsyncCall(ToolsMLAccord.ReinforceNetwork, new object[] { LogDir });
-                        break;
-                    case Common.TEST_TRAIN_NW_KELP:
-                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 0 });
-                        break;
-                    case Common.TEST_REINFORCE_KELP:
-                        AsyncCall(ToolsMLKelp.ReinforceNetwork, new object[] { LogDir });
-                        break;
-                    // @todo 実験用のため修正予定
-                    case Common.TEST_TRAIN_NW_KELP0:
-                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 0 });
-                        break;
-                    case Common.TEST_TRAIN_NW_KELP1:
-                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 1 });
-                        break;
-                    case Common.TEST_TRAIN_NW_KELP2:
-                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 2 });
-                        break;
-                    case Common.TEST_TRAIN_NW_KELP3:
-                        AsyncCall(ToolsMLKelp.TrainNetwork, new object[] { LogDir, 3 });
-                        break;
-                    // @todo 実験用のため修正予定
-                    default:
-                        AsyncCall(Common.TestCommand);
-                        break;
-                }
-            }
-            else
-            {
-                // パラメータ指定あり
-                AsyncCall(Common.TestCommandBase, new object[] { param });
-            }
+            AsyncCall(Common.TestCommand);
         },
         _ =>
         {
-            var res = !IsBusy;
-            // 旧版での棋譜生成は非対応
-            if (ModeV1 && TestType == Common.TEST_CREATE)
-            {
-                res = false;
-            }
-            return res;
+            return !IsBusy;
         }));
 
         /// <summary>
@@ -573,19 +416,6 @@ namespace WpfApp.ViewModels
         {
             return !IsBusy;
         }));
-
-        #endregion
-    }
-
-    /// <summary>
-    /// プレイヤー情報
-    /// </summary>
-    public class PlayerInfo : NotificationObject
-    {
-        #region プレイヤー情報
-
-        public string Version { get; set; } = "";
-        public string Name { get; set; } = "";
 
         #endregion
     }
