@@ -12,8 +12,8 @@ The goal is to make it as simple and easy to understand as possible with MVVM/XA
 
 Suggestions for improvement are welcome!
 
-## [ŠJ”­ƒƒ‚]
-- ‹@ŠBŠwKƒIƒZƒ‚Ìƒx[ƒX‚Æ‚È‚éƒvƒƒOƒ‰ƒ€‚ðì¬B‚±‚ê‚ðŠî‚ÉAccord.Net‚âKelpNet‚É‚æ‚éƒvƒŒƒCƒ„[‚ðŽÀ‘•’†B
-- Œ»ó.NET Framework 4.6.1‘Î‰žB•Ê“r.NET6‘Î‰žŽÀ‘•’†B
-- ƒvƒŒƒCƒ„[‚ÍŠO•”ƒvƒ‰ƒOƒCƒ“‘Î‰žÏ‚ÝB
-- ƒvƒŒƒCƒ„[ˆ—•”‚Íƒ}ƒ‹ƒ`ƒXƒŒƒbƒh‘Î‰žÏ‚ÝB
+## [é–‹ç™ºãƒ¡ãƒ¢]
+- æ©Ÿæ¢°å­¦ç¿’ã‚ªã‚»ãƒ­ã®ãƒ™ãƒ¼ã‚¹ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã€‚ã“ã‚Œã‚’åŸºã«Accord.Netã‚„KelpNetã«ã‚ˆã‚‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’å®Ÿè£…ä¸­ã€‚
+- ç¾çŠ¶.NET Framework 4.6.1å¯¾å¿œã€‚åˆ¥é€”.NET6å¯¾å¿œå®Ÿè£…ä¸­ã€‚
+- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¯å¤–éƒ¨ãƒ—ãƒ©ã‚°ã‚¤ãƒ³å¯¾å¿œæ¸ˆã¿ã€‚
+- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‡¦ç†éƒ¨ã¯ãƒžãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰å¯¾å¿œæ¸ˆã¿ã€‚
