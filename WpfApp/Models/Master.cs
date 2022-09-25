@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WpfApp.Utils;
 using WpfLib.OthelloInterface;
 
@@ -72,7 +73,7 @@ namespace WpfApp.Models
             // プラグインプレイヤー登録
             foreach (var item in Common.GetPluginList<IOthelloPlayer>())
             {
-                PlayerMap.Add(item.Name + Common.PLUGIN_SUF, item);
+                PlayerMap.Add(item.Name + " *", item);
             }
 
             // 登録済先頭プレイヤー選択
@@ -94,38 +95,47 @@ namespace WpfApp.Models
             // 更新色表示削除
             SetData();
             SetInfo(false);
-            SetTitle(Common.TITLE_PLAYER);
+            SetStatus(Common.STATUS_INIT);
         }
 
         /// <summary>
         /// 位置選択
         /// </summary>
         /// <param name="pos">クリック位置</param>
-        public void GameSelectPos(int pos)
+        /// @note Calc()を非同期化。処理完了待機中の要求は破棄するが自動進行時はデータ更新済みのため処理継続。
+        public async void GameSelectPos(int pos)
         {
             if (Turn != Common.EMPTY)
             {
-                // 合法手があるなら
-                var lm = Tools.LegalMove(BP, BO);
-                if (lm != 0)
+                // 処理完了済みまたは自動進行時なら
+                if (CalcTask == null || pos == -1)
                 {
-                    // 戦略が対人または計算不可ならクリック位置を選択
-                    var sp = (Turn == Common.BLACK) ? PlayerB.Calc(BP, BO) : PlayerW.Calc(BP, BO);
-                    if (sp == 0)
+                    // 合法手があるなら
+                    var lm = Tools.LegalMove(BP, BO);
+                    if (lm != 0)
                     {
-                        sp = Tools.Pos2Bit(pos);
+                        SetStatus(Common.STATUS_CALC);
+                        // 戦略が手動または計算不可ならクリック位置を選択
+                        // var sp = (Turn == Common.BLACK) ? PlayerB.Calc(BP, BO) : PlayerW.Calc(BP, BO);
+                        CalcTask = (Turn == Common.BLACK) ? Task.Run(() => PlayerB.Calc(BP, BO)) : Task.Run(() => PlayerW.Calc(BP, BO));
+                        var sp = await CalcTask;
+                        if (sp == 0)
+                        {
+                            sp = Tools.Pos2Bit(pos);
+                        }
+                        // 合法手なら反転してターン終了
+                        if ((sp & lm) != 0)
+                        {
+                            Tools.Flip(ref BP, ref BO, sp);
+                            GameEndTurn(sp);
+                        }
+                        CalcTask = null;
                     }
-                    // 合法手なら反転してターン終了
-                    if ((sp & lm) != 0)
+                    // 合法手がないならターン終了
+                    else
                     {
-                        Tools.Flip(ref BP, ref BO, sp);
-                        GameEndTurn(false);
+                        GameEndTurn(0);
                     }
-                }
-                // 合法手がないならターン終了
-                else
-                {
-                    GameEndTurn(true);
                 }
             }
         }
@@ -133,8 +143,8 @@ namespace WpfApp.Models
         /// <summary>
         /// ターン終了
         /// </summary>
-        /// <param name="pass">パス状態</param>
-        private void GameEndTurn(bool pass)
+        /// <param name="pos">置石位置</param>
+        private void GameEndTurn(ulong pos)
         {
             // ターン交替
             Turn *= -1;
@@ -144,17 +154,21 @@ namespace WpfApp.Models
             SetBack(false);
             SetData();
             SetInfo(false);
-            SetTitle(Common.TITLE_WAIT);
+            SetStatus(Common.STATUS_NEXT, pos);
 
-            // 合法手がないならパス
+            // 合法手がないなら
             if (Tools.LegalMove(BP, BO) == 0)
             {
-                SetTitle(Common.TITLE_PASS);
                 // 前回ターンがパスならゲーム終了
-                if (pass)
+                if (pos == 0)
                 {
-                    SetTitle(Common.TITLE_RESULT);
+                    SetStatus(Common.STATUS_RESULT);
                     Turn = Common.EMPTY;
+                }
+                // 前回ターンがパスでなければパス
+                else
+                {
+                    SetStatus(Common.STATUS_PASS);
                 }
             }
 
@@ -162,59 +176,6 @@ namespace WpfApp.Models
             if (AutomaticMove)
             {
                 GameSelectPos(-1);
-            }
-        }
-
-        /// <summary>
-        /// <see cref="Title"/>
-        /// </summary>
-        private string title = "";
-        /// <summary>
-        /// タイトル
-        /// </summary>
-        public string Title
-        {
-            get => title;
-            set
-            {
-                if (value != title)
-                {
-                    title = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        /// <summary>
-        /// タイトル設定
-        /// </summary>
-        /// <param name="type">タイトル種別</param>
-        /// 各種状況をタイトルとしてまとめて通知する
-        public void SetTitle(int type)
-        {
-            if (Turn != Common.EMPTY)
-            {
-                switch (type)
-                {
-                    case Common.TITLE_PLAYER:
-                        var sb = PlayerB.Name;
-                        var sw = PlayerW.Name;
-                        Title = $"●：{sb}／○：{sw}";
-                        break;
-                    case Common.TITLE_RESULT:
-                        var cb = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
-                        var cw = (Turn == Common.BLACK) ? Tools.BitCount(BO) : Tools.BitCount(BP);
-                        Title = $"●：{cb}／○：{cw}";
-                        break;
-                    case Common.TITLE_WAIT:
-                        Title = (Turn == Common.BLACK) ? "●：待機中…" : "○：待機中…";
-                        break;
-                    case Common.TITLE_PASS:
-                        Title = (Turn == Common.BLACK) ? "●：パス" : "○：パス";
-                        break;
-                    default:
-                        break;
-                }
             }
         }
 
@@ -277,7 +238,7 @@ namespace WpfApp.Models
         /// 背景色設定
         /// </summary>
         /// <param name="forced">強制設定</param>
-        /// 合法手を背景色情報用の配列として通知する
+        /// 合法手を背景色用の配列として通知する
         public void SetBack(bool forced)
         {
             if (ShowCandidate)
@@ -291,7 +252,7 @@ namespace WpfApp.Models
             }
             else if (forced)
             {
-                // 候補表示なしに変更時は初期化
+                // 候補表示なしに設定変更時は初期化
                 for (int i = 0; i < back.Length; i++) { back[i] = false; }
                 Back = back;
             }
@@ -319,7 +280,8 @@ namespace WpfApp.Models
         /// </summary>
         /// <param name="forced">強制設定</param>
         /// 評価値を各種情報用の配列に変換して通知する
-        public void SetInfo(bool forced)
+        /// @note Score()を非同期化。処理完了待機中の要求は破棄して最新情報のみ反映。
+        public async void SetInfo(bool forced)
         {
             if (forced)
             {
@@ -327,7 +289,7 @@ namespace WpfApp.Models
                 for (int i = 0; i < 64; i++)
                 {
                     info[8 * i + 0] = "White";
-                    info[8 * i + 1] = i.ToString();
+                    info[8 * i + 1] = "";
                     info[8 * i + 2] = "White";
                     info[8 * i + 3] = "";
                     info[8 * i + 4] = "White";
@@ -337,19 +299,146 @@ namespace WpfApp.Models
                 }
                 Info = info;
             }
-            var score = PlayerE.Score(BP, BO);
-            if (score?.Length == 64)
+            // 最新情報保存
+            SaveTurn = Turn;
+            SaveBP = BP;
+            SaveBO = BO;
+            // 処理完了済みなら
+            if (ScoreTask == null)
             {
-                var order = score.OrderByDescending(n => n);
-                var top3 = order.ElementAtOrDefault(2);
-                for (int i = 0; i < 64; i++)
+                double[] score = null;
+                // 最新情報が存在すれば処理継続
+                while (SaveTurn != Common.EMPTY)
                 {
-                    info[8 * i + 6] = (score[i] >= top3) ? "Red" : "Blue";
-                    info[8 * i + 7] = double.IsNaN(score[i]) ? "" : score[i].ToString("F3");
+                    ScoreTask = Task.Run(() => PlayerE.Score(SaveBP, SaveBO));
+                    SaveTurn = Common.EMPTY;
+                    score = await ScoreTask;
                 }
-                Info = info;
+                // var score = PlayerE.Score(BP, BO);
+                if (score?.Length == 64)
+                {
+                    var order = score.OrderByDescending(n => n);
+                    var top3 = order.ElementAtOrDefault(2);
+                    for (int i = 0; i < 64; i++)
+                    {
+                        // インデックスと評価値を設定
+                        info[8 * i + 0] = "White";
+                        info[8 * i + 1] = i.ToString();
+                        info[8 * i + 6] = (score[i] >= top3) ? "Red" : "Blue";
+                        info[8 * i + 7] = double.IsNaN(score[i]) ? "" : score[i].ToString("F3");
+                    }
+                    Info = info;
+                }
+                ScoreTask = null;
             }
         }
+
+        /// <summary>
+        /// <see cref="Status"/>
+        /// </summary>
+        private GameStatus status = new GameStatus();
+        /// <summary>
+        /// ステータス
+        /// </summary>
+        public GameStatus Status
+        {
+            get => status;
+            set
+            {
+                status = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// ステータス設定
+        /// </summary>
+        /// <param name="type">ステータス種別</param>
+        /// <param name="pos">置石位置（ターン終了時のみ）</param>
+        /// ゲームの進行状況をステータスとしてまとめて通知する
+        public void SetStatus(int type, ulong pos = 0)
+        {
+            if (Turn != Common.EMPTY)
+            {
+                switch (type)
+                {
+                    case Common.STATUS_INIT:
+                        // 履歴初期化
+                        status.Record.Clear();
+                        status.CountB = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        status.CountW = (Turn == Common.WHITE) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        // 戦略種別確認
+                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
+                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
+                        // 戦略種別を基にステータス文字列を設定
+                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        break;
+                    case Common.STATUS_CTRL:
+                        // 戦略種別確認
+                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
+                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
+                        // 戦略種別を基にステータス文字列を設定
+                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        break;
+                    case Common.STATUS_NEXT:
+                        // 履歴更新
+                        status.Record.Add(Tools.Bit2Pos(pos));
+                        status.CountB = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        status.CountW = (Turn == Common.WHITE) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        // 戦略種別を基にステータス文字列を設定
+                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        break;
+                    case Common.STATUS_RESULT:
+                        // 結果を基にステータス文字列を設定
+                        status.CountB = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        status.CountW = (Turn == Common.WHITE) ? Tools.BitCount(BP) : Tools.BitCount(BO);
+                        status.StatusB = (status.CountB > status.CountW) ? Common.STATUS_WIN : (status.CountB < status.CountW) ? Common.STATUS_LOSE : Common.STATUS_DRAW;
+                        status.StatusW = (status.CountB < status.CountW) ? Common.STATUS_WIN : (status.CountB > status.CountW) ? Common.STATUS_LOSE : Common.STATUS_DRAW;
+                        break;
+                    case Common.STATUS_CALC:
+                        // ステータス文字列のみ設定
+                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? status.StatusB : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? status.StatusW : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        break;
+                    case Common.STATUS_PASS:
+                        // ステータス文字列のみ設定
+                        status.StatusB = (Turn == Common.BLACK) ? Common.STATUS_PASS : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? Common.STATUS_PASS : Common.STATUS_EMPTY;
+                        break;
+                    default:
+                        break;
+                }
+                Status = status;
+            }
+        }
+
+        /// <summary>
+        /// 対戦状態（一時保存）
+        /// </summary>
+        private int SaveTurn;
+
+        /// <summary>
+        /// BitBoard：自分（一時保存）
+        /// </summary>
+        private ulong SaveBP;
+
+        /// <summary>
+        /// BitBoard：相手（一時保存）
+        /// </summary>
+        private ulong SaveBO;
+
+        /// <summary>
+        /// 計算結果取得タスク
+        /// </summary>
+        private Task<ulong> CalcTask;
+
+        /// <summary>
+        /// 評価値取得タスク
+        /// </summary>
+        private Task<double[]> ScoreTask;
     }
 
 }

@@ -1,10 +1,17 @@
 ﻿// メイン処理の版数。CtrlViewModel.cs と一致させること。
 // #define MODE_V1
 
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
 using WpfApp.Models;
 using WpfApp.Utils;
+
+#if MODE_V1
+using GameMaster = WpfApp.Models.MasterV1;
+#else
+using GameMaster = WpfApp.Models.Master;
+#endif
 
 namespace WpfApp.ViewModels
 {
@@ -120,11 +127,7 @@ namespace WpfApp.ViewModels
         /// ゲームマスター
         /// </summary>
         /// メインモデルとして起動時に生成する
-#if MODE_V1
-        private readonly MasterV1 Master = new MasterV1();
-#else
-        private readonly Master Master = new Master();
-#endif
+        private readonly GameMaster Master = new GameMaster();
 
         /// <summary>
         /// 石データ
@@ -143,7 +146,7 @@ namespace WpfApp.ViewModels
             Master.PropertyChanged += BackPropertyChanged;
             Master.PropertyChanged += DataPropertyChanged;
             Master.PropertyChanged += InfoPropertyChanged;
-            Master.PropertyChanged += TitlePropertyChanged;
+            Master.PropertyChanged += StatusPropertyChanged;
 
             for (int i = 0; i < Common.SIZE; i++)
             {
@@ -179,6 +182,27 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
+        /// <see cref="Status"/>
+        /// </summary>
+        /// @note ステータスは[(ステータス,ツールチップ),領域数]の構成。ビューと一致させること。
+        private ObservableCollection<string> status = new ObservableCollection<string>() { "", "", "", "", "", "", };
+        /// <summary>
+        /// ステータス
+        /// </summary>
+        public ObservableCollection<string> Status
+        {
+            get => status;
+            set
+            {
+                if (value != status)
+                {
+                    status = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// <see cref="IsBusy"/>
         /// </summary>
         private bool isBusy = false;
@@ -193,7 +217,7 @@ namespace WpfApp.ViewModels
                 if (value != isBusy)
                 {
                     isBusy = value;
-                    // 開始、選択の同時起動を抑止
+                    // 開始と選択の同時起動を抑止
                     StartCommand.RaiseCanExecuteChanged();
                     SelectCommand.RaiseCanExecuteChanged();
                 }
@@ -245,42 +269,6 @@ namespace WpfApp.ViewModels
         #region コマンド
 
         /// <summary>
-        /// <see cref="OnCloseInfoCommand"/>
-        /// </summary>
-        private DelegateCommand onCloseInfoCommand;
-        /// <summary>
-        /// 情報終了時処理用コマンド
-        /// </summary>
-        public DelegateCommand OnCloseInfoCommand => onCloseInfoCommand ?? (onCloseInfoCommand = new DelegateCommand(_ =>
-        {
-        },
-        _ =>
-        {
-            return true;
-        }));
-
-        /// <summary>
-        /// <see cref="OnCloseCtrlCommand"/>
-        /// </summary>
-        private DelegateCommand onCloseCtrlCommand;
-        /// <summary>
-        /// 設定終了時処理用コマンド
-        /// </summary>
-        public DelegateCommand OnCloseCtrlCommand => onCloseCtrlCommand ?? (onCloseCtrlCommand = new DelegateCommand(_ =>
-        {
-            // 設定変更反映
-            Master.SetBack(true);
-            Master.SetInfo(true);
-            Master.SetTitle(Common.TITLE_PLAYER);
-            // 起動中タスクキャンセル
-            CtrlViewModel?.CancelCommand.Execute(null);
-        },
-        _ =>
-        {
-            return true;
-        }));
-
-        /// <summary>
         /// <see cref="OpenInfoCommand"/>
         /// </summary>
         private DelegateCommand openInfoCommand;
@@ -306,6 +294,42 @@ namespace WpfApp.ViewModels
         public DelegateCommand OpenCtrlCommand => openCtrlCommand ?? (openCtrlCommand = new DelegateCommand(_ =>
         {
             CtrlViewModel = new CtrlViewModel(Master);
+        },
+        _ =>
+        {
+            return true;
+        }));
+
+        /// <summary>
+        /// <see cref="OnCloseInfoCommand"/>
+        /// </summary>
+        private DelegateCommand onCloseInfoCommand;
+        /// <summary>
+        /// 情報終了時処理用コマンド
+        /// </summary>
+        public DelegateCommand OnCloseInfoCommand => onCloseInfoCommand ?? (onCloseInfoCommand = new DelegateCommand(_ =>
+        {
+        },
+        _ =>
+        {
+            return true;
+        }));
+
+        /// <summary>
+        /// <see cref="OnCloseCtrlCommand"/>
+        /// </summary>
+        private DelegateCommand onCloseCtrlCommand;
+        /// <summary>
+        /// 設定終了時処理用コマンド
+        /// </summary>
+        public DelegateCommand OnCloseCtrlCommand => onCloseCtrlCommand ?? (onCloseCtrlCommand = new DelegateCommand(_ =>
+        {
+            // 起動中タスクキャンセル
+            CtrlViewModel?.CancelCommand.Execute(null);
+            // 設定変更反映
+            Master.SetBack(true);
+            Master.SetInfo(true);
+            Master.SetStatus(Common.STATUS_CTRL);
         },
         _ =>
         {
@@ -364,11 +388,7 @@ namespace WpfApp.ViewModels
             {
                 return;
             }
-#if MODE_V1
-            var p = sender as MasterV1;
-#else
-            var p = sender as Master;
-#endif
+            var p = sender as GameMaster;
             if (Data.Length != p?.Back.Length)
             {
                 return;
@@ -391,30 +411,26 @@ namespace WpfApp.ViewModels
             {
                 return;
             }
-#if MODE_V1
-            var p = sender as MasterV1;
-#else
-            var p = sender as Master;
-#endif
+            var p = sender as GameMaster;
             if (Data.Length != p?.Data.Length)
             {
                 return;
             }
             for (int i = 0; i < Data.Length; i++)
             {
-                // 連続更新時に更新色が残り反転処理が重複するため消去すること。
-                Data[i].LastColor = "Transparent";
                 // 新規なら更新色を着手色に設定。反転なら更新色をダミーに設定。
+                // 連続更新時に更新色が残り反転処理が重複するため消去すること。
                 // 反転用データトリガ判定のため、石色->更新色の順序とすること。
+                Data[i].LastColor = "Transparent";
                 switch (p.Data[i])
                 {
                     case Common.BLACK:
-                        string b = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "White") ? "Red" : "Transparent";
+                        string b = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "White") ? "Red" : "Black";
                         Data[i].Color = "Black";
                         Data[i].LastColor = b;
                         break;
                     case Common.WHITE:
-                        string w = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "Black") ? "Red" : "Transparent";
+                        string w = (Data[i].Color == "Transparent") ? "Gray" : (Data[i].Color == "Black") ? "Red" : "White";
                         Data[i].Color = "White";
                         Data[i].LastColor = w;
                         break;
@@ -439,11 +455,7 @@ namespace WpfApp.ViewModels
             {
                 return;
             }
-#if MODE_V1
-            var p = sender as MasterV1;
-#else
-            var p = sender as Master;
-#endif
+            var p = sender as GameMaster;
             if (Data.Length * 8 != p?.Info.Length)
             {
                 return;
@@ -458,23 +470,31 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
-        /// タイトル変更通知処理
+        /// ステータス変更通知処理
         /// </summary>
         /// <param name="sender">送信元</param>
         /// <param name="e">イベント</param>
-        /// 通知された文字列をそのままタイトルに設定する
-        private void TitlePropertyChanged(object sender, PropertyChangedEventArgs e)
+        /// 通知されたステータスをビューのステータスに変換する
+        /// @note 通知ステータス(@ref WpfApp.Models.GameStatus)とステータス文字列(@ref WpfApp.Models.Common::StatusString)から生成。ビューと一致させること。
+        private void StatusPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!"Title".Equals(e.PropertyName))
+            if (!"Status".Equals(e.PropertyName))
             {
                 return;
             }
-#if MODE_V1
-            var p = sender as MasterV1;
-#else
-            var p = sender as Master;
-#endif
-            Title = p?.Title ?? "";
+            var p = sender as GameMaster;
+            if (p == null || !Common.StatusString.ContainsKey(p.Status.StatusB) || !Common.StatusString.ContainsKey(p.Status.StatusW))
+            {
+                return;
+            }
+            var sb = Common.StatusString[p.Status.StatusB];
+            var sw = Common.StatusString[p.Status.StatusW];
+            status[0] = sb.Equals("") ? ("○：" + sw) : sw.Equals("") ? ("●：" + sb) : ("●：" + sb + "／○：" + sw);
+            status[2] = "●：" + p.Status.CountB;
+            status[3] = Master.PlayerB.Name;
+            status[4] = "○：" + p.Status.CountW;
+            status[5] = Master.PlayerW.Name;
+            Status = status;
         }
 
         #endregion

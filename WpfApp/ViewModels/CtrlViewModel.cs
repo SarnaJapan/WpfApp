@@ -9,6 +9,14 @@ using WpfApp.Models;
 using WpfApp.Utils;
 using WpfLib.OthelloInterface;
 
+#if MODE_V1
+using GameMaster = WpfApp.Models.MasterV1;
+using IGamePlayer = WpfLib.OthelloInterface.IOthelloPlayerV1;
+#else
+using GameMaster = WpfApp.Models.Master;
+using IGamePlayer = WpfLib.OthelloInterface.IOthelloPlayer;
+#endif
+
 namespace WpfApp.ViewModels
 {
     /// <summary>
@@ -16,15 +24,13 @@ namespace WpfApp.ViewModels
     /// </summary>
     public class CtrlViewModel : NotificationObject
     {
+        #region 設定ダイアログ
+
         /// <summary>
         /// ゲームマスター
         /// </summary>
         /// 設定対象として呼出時に参照先を指定する
-#if MODE_V1
-        private readonly MasterV1 Master;
-#else
-        private readonly Master Master;
-#endif
+        private readonly GameMaster Master;
 
         /// <summary>
         /// コンストラクタ：プレイヤー関連選択肢の設定
@@ -32,11 +38,7 @@ namespace WpfApp.ViewModels
         /// <param name="master">設定対象ゲームマスター</param>
         /// - プレイヤーリストはゲームマスターから取得
         /// - 評価用と対戦用の選択肢はバージョンオプションでフィルター
-#if MODE_V1
-        public CtrlViewModel(MasterV1 master)
-#else
-        public CtrlViewModel(Master master)
-#endif
+        public CtrlViewModel(GameMaster master)
         {
             Master = master;
 
@@ -63,6 +65,8 @@ namespace WpfApp.ViewModels
             MatchPB = MatchMap.First().Value;
             MatchPW = MatchMap.First().Value;
         }
+
+        #endregion
 
         #region ダイアログ表示対応
 
@@ -104,39 +108,27 @@ namespace WpfApp.ViewModels
         #region プロパティ
 
         /// <summary>
-        /// <see cref="Master.PlayerMap"/>
+        /// <see cref="GameMaster.PlayerMap"/>
         /// </summary>
-#if MODE_V1
-        public Dictionary<string, IOthelloPlayerV1> PlayerMap
-#else
-        public Dictionary<string, IOthelloPlayer> PlayerMap
-#endif
+        public Dictionary<string, IGamePlayer> PlayerMap
         {
             get => Master.PlayerMap;
             set => Master.PlayerMap = value;
         }
 
         /// <summary>
-        /// <see cref="Master.PlayerB"/>
+        /// <see cref="GameMaster.PlayerB"/>
         /// </summary>
-#if MODE_V1
-        public IOthelloPlayerV1 PlayerB
-#else
-        public IOthelloPlayer PlayerB
-#endif
+        public IGamePlayer PlayerB
         {
             get => Master.PlayerB;
             set => Master.PlayerB = value;
         }
 
         /// <summary>
-        /// <see cref="Master.PlayerW"/>
+        /// <see cref="GameMaster.PlayerW"/>
         /// </summary>
-#if MODE_V1
-        public IOthelloPlayerV1 PlayerW
-#else
-        public IOthelloPlayer PlayerW
-#endif
+        public IGamePlayer PlayerW
         {
             get => Master.PlayerW;
             set => Master.PlayerW = value;
@@ -145,27 +137,19 @@ namespace WpfApp.ViewModels
         /// <summary>
         /// 評価用プレイヤーマップ
         /// </summary>
-#if MODE_V1
-        public static IEnumerable<KeyValuePair<string, IOthelloPlayerV1>> EvalMap { get; set; }
-#else
-        public static IEnumerable<KeyValuePair<string, IOthelloPlayer>> EvalMap { get; set; }
-#endif
+        public static IEnumerable<KeyValuePair<string, IGamePlayer>> EvalMap { get; set; }
 
         /// <summary>
-        /// <see cref="Master.PlayerE"/>
+        /// <see cref="GameMaster.PlayerE"/>
         /// </summary>
-#if MODE_V1
-        public IOthelloPlayerV1 PlayerE
-#else
-        public IOthelloPlayer PlayerE
-#endif
+        public IGamePlayer PlayerE
         {
             get => Master.PlayerE;
             set => Master.PlayerE = value;
         }
 
         /// <summary>
-        /// <see cref="Master.ShowCandidate"/>
+        /// <see cref="GameMaster.ShowCandidate"/>
         /// </summary>
         public bool ShowCandidate
         {
@@ -174,7 +158,7 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
-        /// <see cref="Master.AutomaticMove"/>
+        /// <see cref="GameMaster.AutomaticMove"/>
         /// </summary>
         public bool AutomaticMove
         {
@@ -272,9 +256,22 @@ namespace WpfApp.ViewModels
             }
         }
 
-        #endregion
-
-        #region コマンド
+        /// <summary>
+        /// <see cref="CancelTokenSource"/>
+        /// </summary>
+        private CancellationTokenSource cancelTokenSource;
+        /// <summary>
+        /// キャンセルトークン
+        /// </summary>
+        private CancellationTokenSource CancelTokenSource
+        {
+            get => cancelTokenSource;
+            set
+            {
+                cancelTokenSource = value;
+                CancelCommand.RaiseCanExecuteChanged();
+            }
+        }
 
         /// <summary>
         /// <see cref="IsBusy"/>
@@ -298,22 +295,9 @@ namespace WpfApp.ViewModels
             }
         }
 
-        /// <summary>
-        /// <see cref="CancelTokenSource"/>
-        /// </summary>
-        private CancellationTokenSource cancelTokenSource;
-        /// <summary>
-        /// キャンセルトークン
-        /// </summary>
-        private CancellationTokenSource CancelTokenSource
-        {
-            get => cancelTokenSource;
-            set
-            {
-                cancelTokenSource = value;
-                CancelCommand.RaiseCanExecuteChanged();
-            }
-        }
+        #endregion
+
+        #region コマンド
 
         /// <summary>
         /// <see cref="CancelCommand"/>
@@ -346,9 +330,10 @@ namespace WpfApp.ViewModels
             });
             var res = await Task.Run(() =>
             {
-                return func(progress, (CancelTokenSource != null) ? CancelTokenSource.Token : new CancellationToken(false));
+                return func(progress, CancelTokenSource.Token);
             });
             Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
+            CancelTokenSource.Dispose();
             CancelTokenSource = null;
             IsBusy = false;
         }
@@ -371,9 +356,10 @@ namespace WpfApp.ViewModels
             });
             var res = await Task.Run(() =>
             {
-                return func(progress, (CancelTokenSource != null) ? CancelTokenSource.Token : new CancellationToken(false), pb, pw, count);
+                return func(progress, CancelTokenSource.Token, pb, pw, count);
             });
             Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
+            CancelTokenSource.Dispose();
             CancelTokenSource = null;
             IsBusy = false;
         }

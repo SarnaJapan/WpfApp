@@ -11,7 +11,7 @@ namespace WpfApp.Models
     /// </summary>
     internal static class Common
     {
-        #region 個別
+        #region 専用
 
         /// <summary>
         /// 盤サイズ
@@ -20,24 +20,16 @@ namespace WpfApp.Models
         public const int SIZE = 8;
 
         /// @name 石色
-        ///@{
+        /// @{
         public const int EMPTY = 0;
         public const int BLACK = 1;
         public const int WHITE = -1;
-        ///@}
+        /// @}
 
         /// <summary>
         /// タイトル
         /// </summary>
         public const string TITLE = "WPF Othello";
-
-        /// @name タイトル種別
-        ///@{
-        public const int TITLE_PLAYER = 0;
-        public const int TITLE_RESULT = 1;
-        public const int TITLE_WAIT = 2;
-        public const int TITLE_PASS = 3;
-        ///@}
 
         /// <summary>
         /// BitBoard版初期値：黒
@@ -50,7 +42,7 @@ namespace WpfApp.Models
         public const ulong BB_WHITE = 0x0000001008000000;
 
         /// @name バージョン情報
-        ///@{
+        /// @{
 
         /// <summary>
         /// 表示フォーマット
@@ -61,19 +53,128 @@ namespace WpfApp.Models
         /// <summary>
         /// オプション：対戦選択肢対象外
         /// </summary>
+        /// 常に計算不可を返す手動プレイヤー用オプション。設定時は自動対戦選択肢の対象外となる。
         public const string OPTION_NOMATCH = "/NoMatch";
 
         /// <summary>
         /// オプション：評価選択肢対象外
         /// </summary>
+        /// 評価値が存在しないランダム戦略プレイヤー用オプション。設定時は評価選択肢の対象外となる。
         public const string OPTION_NOEVAL = "/NoEval";
 
-        ///@}
+        /// @}
 
         /// <summary>
         /// 疑似乱数ジェネレータ
         /// </summary>
         public static System.Random R = new System.Random();
+
+        /// @name ステータス種別
+        /// @{
+        public const int STATUS_EMPTY = 0;  //!< ステータス：空白状態
+        public const int STATUS_WIN = 1;    //!< ステータス：勝ち状態
+        public const int STATUS_LOSE = 2;   //!< ステータス：負け状態
+        public const int STATUS_DRAW = 3;   //!< ステータス：引き分け状態
+        public const int STATUS_WAIT = 4;   //!< ステータス：ターン進行待ち状態（手動）
+        public const int STATUS_NEXT = 5;   //!< ステータス／パラメータ：ターン進行待ち状態／通知
+        public const int STATUS_CALC = 6;   //!< ステータス／パラメータ：計算開始状態／通知
+        public const int STATUS_PASS = 7;   //!< ステータス／パラメータ：パス状態／通知
+        public const int STATUS_RESULT = 8; //!< パラメータ：結果表示通知
+        public const int STATUS_INIT = 9;   //!< パラメータ：初期化通知
+        public const int STATUS_CTRL = 10;  //!< パラメータ：設定更新通知
+        /// @}
+
+        /// <summary>
+        /// ステータス文字列
+        /// </summary>
+        /// ステータス(@ref WpfApp.ViewModels.Board::Status)に設定する文字列。通知ステータス(@ref WpfApp.Models.GameStatus)から変換。
+        /// @sa STATUS_EMPTY,STATUS_WIN,STATUS_LOSE,STATUS_DRAW,STATUS_WAIT,  
+        /// STATUS_NEXT,STATUS_CALC,STATUS_PASS,STATUS_RESULT,STATUS_INIT,STATUS_CTRL
+        /// @par STATUS_INIT
+        /// 初期化シーケンス
+        /// @msc
+        /// MainWindow, Board, Master, Player;
+        /// MainWindow->Board [label="StartCommand@binding"];
+        /// Board=>Master     [label="GameStart()"];
+        /// Master=>Master    [label="SetStatus(STATUS_INIT)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_NEXT/STATUS_WAIT)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_NEXT/STATUS_WAIT)"];
+        /// @endmsc
+        /// @par STATUS_CTRL
+        /// 設定更新シーケンス
+        /// @msc
+        /// MainWindow, Board, Master, Player;
+        /// MainWindow->Board [label="OnCloseCtrlCommand@binding"];
+        /// Board=>Master     [label="SetStatus(STATUS_CTRL)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_NEXT/STATUS_WAIT)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_NEXT/STATUS_WAIT)"];
+        /// @endmsc
+        /// @par STATUS_NEXT/STATUS_CALC/STATUS_PASS/STATUS_RESULT
+        /// ステータス表示シーケンス
+        /// @msc
+        /// MainWindow, Board, Master, Player;
+        /// MainWindow->Board [label="SelectCommand@binding"];
+        /// Board=>Master     [label="GameSelectPos()"];
+        /// Master=>Master    [label="SetStatus(STATUS_CALC)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_CALC)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_CALC)"];
+        /// Master=>Player    [label="Calc()"];
+        /// Master<<Player    [label="result"];
+        /// Master=>Master    [label="SetStatus(STATUS_NEXT)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_NEXT/STATUS_WAIT)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_NEXT/STATUS_WAIT)"];
+        /// ---               [label="pass"];
+        /// Master=>Master    [label="SetStatus(STATUS_PASS)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_PASS)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_PASS)"];
+        /// ---               [label="result"];
+        /// Master=>Master    [label="SetStatus(STATUS_RESULT)"];
+        /// Board<<=Master    [label="StatusPropertyChanged(STATUS_RESULT)"];
+        /// MainWindow<-Board [label="Status@binding(STATUS_WIN/STATUS_LOSE/STATUS_DRAW)"];
+        /// @endmsc
+        public static Dictionary<int, string> StatusString = new Dictionary<int, string>()
+        {
+            {STATUS_EMPTY, ""},
+            {STATUS_WIN,   "勝ち"},
+            {STATUS_LOSE,  "負け"},
+            {STATUS_DRAW,  "引き分け"},
+            {STATUS_WAIT,  "選択待ち"},
+            {STATUS_NEXT,  "次へ"},
+            {STATUS_CALC,  "計算中…"},
+            {STATUS_PASS,  "パス"},
+        };
+
+        /// <summary>
+        /// 実験処理
+        /// </summary>
+        /// <param name="progress"></param>
+        /// <param name="token"></param>
+        /// <param name="param"></param>
+        /// <returns>処理時間</returns>
+        public static string TestCommandBase(System.IProgress<string> progress, CancellationToken token, object[] param)
+        {
+            // パラメータ確認
+            int timeout;
+            try
+            {
+                timeout = int.Parse((string)param[0]);
+            }
+            catch (System.Exception)
+            {
+                return "Invalid parameter.";
+            }
+
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 100 && !token.IsCancellationRequested; i++)
+            {
+                Thread.Sleep(timeout);
+                progress.Report($"{i}");
+            }
+            sw.Stop();
+
+            return $"{sw.ElapsedMilliseconds} ms";
+        }
 
         /// <summary>
         /// 実験処理
@@ -113,11 +214,6 @@ namespace WpfApp.Models
         {
             return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", subdir);
         }
-
-        /// <summary>
-        /// プラグイン名接尾辞
-        /// </summary>
-        public const string PLUGIN_SUF = " *";
 
         /// <summary>
         /// プラグインディレクトリ
@@ -225,6 +321,51 @@ namespace WpfApp.Models
 
             return true;
         }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 通知ステータス
+    /// </summary>
+    public class GameStatus
+    {
+        #region 通知ステータス
+
+        /// <summary>
+        /// 石数：黒
+        /// </summary>
+        public int CountB { get; set; } = 0;
+
+        /// <summary>
+        /// 石数：白
+        /// </summary>
+        public int CountW { get; set; } = 0;
+
+        /// <summary>
+        /// 手動戦略フラグ：黒
+        /// </summary>
+        public bool ManualB { get; set; } = true;
+
+        /// <summary>
+        /// 手動戦略フラグ：白
+        /// </summary>
+        public bool ManualW { get; set; } = true;
+
+        /// <summary>
+        /// ステータス種別：黒
+        /// </summary>
+        public int StatusB { get; set; } = Common.STATUS_EMPTY;
+
+        /// <summary>
+        /// ステータス種別：白
+        /// </summary>
+        public int StatusW { get; set; } = Common.STATUS_EMPTY;
+
+        /// <summary>
+        /// 履歴
+        /// </summary>
+        public List<int> Record { get; set; } = new List<int>();
 
         #endregion
     }

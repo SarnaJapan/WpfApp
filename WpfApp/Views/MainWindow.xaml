@@ -7,7 +7,7 @@
         xmlns:localU="clr-namespace:WpfApp.Utils"
         xmlns:localVM="clr-namespace:WpfApp.ViewModels"
         mc:Ignorable="d"
-        Height="600" Width="578" Title="{Binding Path=Title}" ResizeMode="NoResize">
+        Height="630" Width="578" Title="{Binding Path=Title}" ResizeMode="NoResize">
 
     <Window.DataContext>
         <localVM:Board />
@@ -54,11 +54,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="24" />
             <RowDefinition Height="514" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="24" />
             <ColumnDefinition Width="514" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+
         <StackPanel Grid.Row="0" Grid.Column="1" Margin="24,-2,0,0" Orientation="Horizontal">
             <Label Width="64" Content="a" />
             <Label Width="64" Content="b" />
@@ -139,7 +142,7 @@
                             <TextBlock Margin="4,15,4,0" Foreground="{Binding [2]}" Text="{Binding [3]}" />
                             <TextBlock Margin="4,30,4,0" Foreground="{Binding [4]}" Text="{Binding [5]}" />
                             <TextBlock Margin="4,45,4,0" Foreground="{Binding [6]}" Text="{Binding [7]}" />
-                            <!-- 個々のアイテム(Stone)ではなく親(Window)のデータコンテキスト(Board)を指定する -->
+                            <!-- 個々のアイテム(Stone)ではなく、親(Window)のデータコンテキスト(Board)を指定する。 -->
                             <Button Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" Style="{StaticResource GridButtonStyle}">
                                 <Button.CommandParameter>
                                     <MultiBinding Converter="{StaticResource PositionConverter}">
@@ -149,7 +152,6 @@
                                 </Button.CommandParameter>
                             </Button>
                         </Grid>
-
                         <DataTemplate.Triggers>
                             <!-- 黒白反転アニメーション -->
                             <MultiDataTrigger>
@@ -236,6 +238,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Border>
+        <StatusBar Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Grid.ColumnSpan="3">
+            <Label Content="{Binding Status[0]}" Width="402" />
+            <Separator />
+            <Label Content="{Binding Status[2]}" Width="64" ToolTip="{Binding Status[3]}" />
+            <Separator />
+            <Label Content="{Binding Status[4]}" Width="64" ToolTip="{Binding Status[5]}" />
+            <Separator />
+        </StatusBar>
     </Grid>
 
 </Window>

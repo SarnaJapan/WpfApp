@@ -4,12 +4,12 @@ using WpfLib.OthelloInterface;
 namespace WpfApp.Models
 {
     /// <summary>
-    /// 対人戦略プレイヤー
+    /// 手動プレイヤー
     /// </summary>
     /// 常に計算不可を返す。対戦選択肢対象外。
     internal class PlayerNull : IOthelloPlayer
     {
-        public string Name { get; set; } = "（なし）";
+        public string Name { get; set; } = "（手動）";
         public string Version => string.Format(Common.VERSION_FORMAT, 2, 0, 0, Common.OPTION_NOMATCH);
         public ulong Calc(ulong p, ulong o) => 0;
         public double[] Score(ulong p, ulong o) => null;
