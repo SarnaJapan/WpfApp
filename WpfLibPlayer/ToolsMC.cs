@@ -151,7 +151,7 @@ namespace WpfLibPlayer
                 // 既存ノード選択
                 TreeNode cur = this;
                 visited.Add(cur);
-                while (cur?.children.Count > 0)
+                while (cur.children.Count > 0)
                 {
                     cur = cur.Select();
                     if (cur != null)
@@ -162,8 +162,8 @@ namespace WpfLibPlayer
 
                 // 末端ノード展開
                 TreeNode add = null;
-                cur?.Expand();
-                if (cur?.children.Count > 0)
+                cur.Expand();
+                if (cur.children.Count > 0)
                 {
                     add = cur.Select();
                     if (add != null)
