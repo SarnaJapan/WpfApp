@@ -13,7 +13,8 @@ The goal is to make it as simple and easy to understand as possible with MVVM/XA
 Suggestions for improvement are welcome!
 
 ## [開発メモ]
-- 機械学習オセロのベースプログラム。これを基にAccord.NetやKelpNetによるプレイヤーを実装中。
-- 現状.NET Framework 4.6.1対応。別途.NET6対応実装中。
 - プレイヤーは外部プラグイン対応済み。
 - プレイヤー処理部はマルチスレッド対応済み。
+- 現状では.NET Framework 4.6.1対応。次版では.NET6対応予定。
+- Accord.NetやKelpNetによる機械学習プレイヤーを実装予定。
+　
