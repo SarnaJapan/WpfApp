@@ -299,8 +299,8 @@ namespace WpfApp.Models
                 }
                 Info = info;
             }
-            // 最新情報保存
-            SaveTurn = Turn;
+            // 最新情報一時保存
+            SaveFlag = true;
             SaveBP = BP;
             SaveBO = BO;
             // 処理完了済みなら
@@ -308,13 +308,13 @@ namespace WpfApp.Models
             {
                 double[] score = null;
                 // 最新情報が存在すれば処理継続
-                while (SaveTurn != Common.EMPTY)
+                while (SaveFlag)
                 {
+                    SaveFlag = false;
+                    // var score = PlayerE.Score(BP, BO);
                     ScoreTask = Task.Run(() => PlayerE.Score(SaveBP, SaveBO));
-                    SaveTurn = Common.EMPTY;
                     score = await ScoreTask;
                 }
-                // var score = PlayerE.Score(BP, BO);
                 if (score?.Length == 64)
                 {
                     var order = score.OrderByDescending(n => n);
@@ -416,9 +416,9 @@ namespace WpfApp.Models
         }
 
         /// <summary>
-        /// 対戦状態（一時保存）
+        /// 一時保存更新フラグ
         /// </summary>
-        private int SaveTurn;
+        private bool SaveFlag;
 
         /// <summary>
         /// BitBoard：自分（一時保存）

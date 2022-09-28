@@ -272,7 +272,8 @@ namespace WpfApp.Models
                 }
                 Info = info;
             }
-            // 最新情報保存
+            // 最新情報一時保存
+            SaveFlag = true;
             SaveTurn = Turn;
             System.Array.Copy(Data, SaveData, Data.Length);
             // 処理完了済みなら
@@ -280,13 +281,13 @@ namespace WpfApp.Models
             {
                 double[] score = null;
                 // 最新情報が存在すれば処理継続
-                while (SaveTurn != Common.EMPTY)
+                while (SaveFlag)
                 {
-                    ScoreTask = Task.Run(() => PlayerE.Score(Turn, SaveData));
-                    SaveTurn = Common.EMPTY;
+                    SaveFlag = false;
+                    // var score = PlayerE.Score(Turn, data);
+                    ScoreTask = Task.Run(() => PlayerE.Score(SaveTurn, SaveData));
                     score = await ScoreTask;
                 }
-                // var score = PlayerE.Score(Turn, data);
                 if (score?.Length == Common.SIZE * Common.SIZE)
                 {
                     var order = score.OrderByDescending(n => n);
@@ -386,6 +387,11 @@ namespace WpfApp.Models
                 Status = status;
             }
         }
+
+        /// <summary>
+        /// 一時保存更新フラグ
+        /// </summary>
+        private bool SaveFlag;
 
         /// <summary>
         /// 対戦状態（一時保存）
