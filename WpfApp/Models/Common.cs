@@ -64,11 +64,6 @@ namespace WpfApp.Models
 
         /// @}
 
-        /// <summary>
-        /// 疑似乱数ジェネレータ
-        /// </summary>
-        public static System.Random R = new System.Random();
-
         /// @name ステータス種別
         /// @{
         public const int STATUS_EMPTY = 0;  //!< ステータス：空白状態
@@ -199,6 +194,33 @@ namespace WpfApp.Models
         #endregion
 
         #region 汎用
+
+        /// <summary>
+        /// 乱数ジェネレータ
+        /// </summary>
+        private static readonly System.Random R = new System.Random();
+
+        /// <summary>
+        /// 乱数ジェネレータ用ロックオブジェクト
+        /// </summary>
+        private static readonly object RandLock = new object();
+
+        /// <summary>
+        /// 乱数取得
+        /// </summary>
+        /// <param name="max">最大値</param>
+        /// <returns>0以上max未満の乱数</returns>
+        public static int Rand(int max)
+        {
+            int res = 0;
+
+            lock (RandLock)
+            {
+                res = R.Next(max);
+            }
+
+            return res;
+        }
 
         /// <summary>
         /// ログディレクトリ

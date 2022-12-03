@@ -142,7 +142,7 @@ namespace WpfApp.Models
                 }
             }
 
-            return (d.Count == 0) ? -1 : d[Common.R.Next(d.Count)];
+            return (d.Count == 0) ? -1 : d[Common.Rand(d.Count)];
         }
 
         /// <summary>

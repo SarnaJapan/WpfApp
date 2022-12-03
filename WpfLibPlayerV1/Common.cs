@@ -35,9 +35,31 @@
         /// @}
 
         /// <summary>
-        /// 疑似乱数ジェネレータ
+        /// 乱数ジェネレータ
         /// </summary>
-        public static System.Random R = new System.Random();
+        private static readonly System.Random R = new System.Random();
+
+        /// <summary>
+        /// 乱数ジェネレータ用ロックオブジェクト
+        /// </summary>
+        private static readonly object RandLock = new object();
+
+        /// <summary>
+        /// 乱数取得
+        /// </summary>
+        /// <param name="max">最大値</param>
+        /// <returns>0以上max未満の乱数</returns>
+        public static int Rand(int max)
+        {
+            int res = 0;
+
+            lock (RandLock)
+            {
+                res = R.Next(max);
+            }
+
+            return res;
+        }
     }
 
 }

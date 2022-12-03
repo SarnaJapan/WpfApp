@@ -48,13 +48,38 @@ namespace WpfApp.Models
         private int Turn;
 
         /// <summary>
+        /// 一時保存フラグ
+        /// </summary>
+        private bool SaveFlag;
+
+        /// <summary>
+        /// 対戦状態（一時保存）
+        /// </summary>
+        private int SaveTurn;
+
+        /// <summary>
+        /// 石色（一時保存）
+        /// </summary>
+        private readonly int[] SaveData = new int[Common.SIZE * Common.SIZE];
+
+        /// <summary>
+        /// 計算結果取得タスク
+        /// </summary>
+        private Task<int> CalcTask;
+
+        /// <summary>
+        /// 評価値取得タスク
+        /// </summary>
+        private Task<double[]> ScoreTask;
+
+        /// <summary>
         /// コンストラクタ：プレイヤーの登録
         /// </summary>
         public MasterV1()
         {
+            // デフォルトプレイヤー登録
             var playerlistv1 = new List<IOthelloPlayerV1>() { new PlayerNullV1(), new PlayerRandV1(), new PlayerMaxCountV1(), new PlayerMinOpenV1(),
                 new PlayerMCV1(), };
-            // デフォルトプレイヤー登録
             foreach (var item in playerlistv1)
             {
                 PlayerMap.Add(item.Name, item);
@@ -91,22 +116,22 @@ namespace WpfApp.Models
         /// 位置選択
         /// </summary>
         /// <param name="pos">クリック位置</param>
-        /// @note Calc()を非同期化。処理完了待機中の要求は破棄するが自動進行時はデータ更新済みのため処理継続。
+        /// @note Calc()を非同期化。処理完了待機中の要求は破棄するが自動進行時なら遅延実行。
         public async void GameSelectPos(int pos)
         {
             if (Turn != Common.EMPTY)
             {
-                // 処理完了済みまたは自動進行時なら
-                if (CalcTask == null || pos == -1)
+                // 処理完了済みなら
+                if (CalcTask == null)
                 {
                     // 合法手があるなら
                     if (ToolsV1.CheckNext(Turn, data))
                     {
                         SetStatus(Common.STATUS_CALC);
                         // 戦略が手動または計算不可ならクリック位置を選択
-                        // var p = (Turn == Common.BLACK) ? PlayerB.Calc(Turn, data) : PlayerW.Calc(Turn, data);
                         CalcTask = (Turn == Common.BLACK) ? Task.Run(() => PlayerB.Calc(Turn, data)) : Task.Run(() => PlayerW.Calc(Turn, data));
                         var p = await CalcTask;
+                        // var p = (Turn == Common.BLACK) ? PlayerB.Calc(Turn, data) : PlayerW.Calc(Turn, data);
                         if (p < 0)
                         {
                             p = pos;
@@ -120,10 +145,19 @@ namespace WpfApp.Models
                         }
                         CalcTask = null;
                     }
-                    // 合法手がないならターン終了
                     else
                     {
+                        // ターン終了
                         GameEndTurn(-1);
+                    }
+                }
+                else
+                {
+                    // 自動進行時なら遅延実行
+                    if (pos == -1)
+                    {
+                        await Task.Delay(10);
+                        GameSelectPos(-1);
                     }
                 }
             }
@@ -280,21 +314,22 @@ namespace WpfApp.Models
             if (ScoreTask == null)
             {
                 double[] score = null;
-                // 最新情報が存在すれば処理継続
+                // 最新情報が有効なら
                 while (SaveFlag)
                 {
                     SaveFlag = false;
-                    // var score = PlayerE.Score(Turn, data);
+                    // 最新情報の評価値を取得
                     ScoreTask = Task.Run(() => PlayerE.Score(SaveTurn, SaveData));
                     score = await ScoreTask;
                 }
+                // var score = PlayerE.Score(Turn, data);
                 if (score?.Length == Common.SIZE * Common.SIZE)
                 {
+                    // インデックスと評価値を設定
                     var order = score.OrderByDescending(n => n);
                     var top3 = order.ElementAtOrDefault(2);
                     for (int i = 0; i < Common.SIZE * Common.SIZE; i++)
                     {
-                        // インデックスと評価値を設定
                         info[8 * i + 0] = "White";
                         info[8 * i + 1] = i.ToString();
                         info[8 * i + 6] = (score[i] >= top3) ? "Red" : "Blue";
@@ -387,31 +422,6 @@ namespace WpfApp.Models
                 Status = status;
             }
         }
-
-        /// <summary>
-        /// 一時保存更新フラグ
-        /// </summary>
-        private bool SaveFlag;
-
-        /// <summary>
-        /// 対戦状態（一時保存）
-        /// </summary>
-        private int SaveTurn;
-
-        /// <summary>
-        /// 石色（一時保存）
-        /// </summary>
-        private readonly int[] SaveData = new int[Common.SIZE * Common.SIZE];
-
-        /// <summary>
-        /// 計算結果取得タスク
-        /// </summary>
-        private Task<int> CalcTask;
-
-        /// <summary>
-        /// 評価値取得タスク
-        /// </summary>
-        private Task<double[]> ScoreTask;
     }
 
 }

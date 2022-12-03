@@ -274,7 +274,7 @@
         public static ulong GetRand(ulong p, ulong o)
         {
             var lm = LegalMove(p, o);
-            var s = Common.R.Next(BitCount(lm));
+            var s = Common.Rand(BitCount(lm));
             for (int i = 0; i < s; i++)
             {
                 // 最下位ビット削除
