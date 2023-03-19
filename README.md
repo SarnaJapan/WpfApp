@@ -12,6 +12,8 @@ The goal is to make it as simple and easy to understand as possible with MVVM/XA
 
 Suggestions for improvement are welcome!
 
+![WpfApp.png](/WpfApp.png)
+
 ## [開発メモ]
 - プレイヤーは外部プラグイン対応済み。
 - プレイヤー処理部はマルチスレッド対応済み。
