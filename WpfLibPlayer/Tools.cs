@@ -30,7 +30,7 @@
                 }
             }
 
-            return 64;
+            return -1;
         }
 
         /// <summary>

@@ -143,7 +143,6 @@ namespace WpfApp.Models
                         // 戦略が手動または計算不可ならクリック位置を選択
                         CalcTask = (Turn == Common.BLACK) ? Task.Run(() => PlayerB.Calc(BP, BO)) : Task.Run(() => PlayerW.Calc(BP, BO));
                         var sp = await CalcTask;
-                        // var sp = (Turn == Common.BLACK) ? PlayerB.Calc(BP, BO) : PlayerW.Calc(BP, BO);
                         if (sp == 0)
                         {
                             sp = Tools.Pos2Bit(pos);
@@ -349,7 +348,6 @@ namespace WpfApp.Models
                     ScoreTask = Task.Run(() => PlayerE.Score(SaveBP, SaveBO));
                     score = await ScoreTask;
                 }
-                // var score = PlayerE.Score(BP, BO);
                 if (score?.Length == 64)
                 {
                     // インデックスと評価値を設定
@@ -402,20 +400,14 @@ namespace WpfApp.Models
                         status.Record.Clear();
                         status.CountB = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
                         status.CountW = (Turn == Common.WHITE) ? Tools.BitCount(BP) : Tools.BitCount(BO);
-                        // 戦略種別確認
-                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
-                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_CTRL:
-                        // 戦略種別確認
-                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
-                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_NEXT:
                         // 履歴更新
@@ -423,8 +415,8 @@ namespace WpfApp.Models
                         status.CountB = (Turn == Common.BLACK) ? Tools.BitCount(BP) : Tools.BitCount(BO);
                         status.CountW = (Turn == Common.WHITE) ? Tools.BitCount(BP) : Tools.BitCount(BO);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_RESULT:
                         // 結果を基にステータス文字列を設定
@@ -435,8 +427,8 @@ namespace WpfApp.Models
                         break;
                     case Common.STATUS_CALC:
                         // ステータス文字列のみ設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? status.StatusB : Common.STATUS_CALC) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? status.StatusW : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? status.StatusB : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? status.StatusW : Common.STATUS_CALC) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_PASS:
                         // ステータス文字列のみ設定

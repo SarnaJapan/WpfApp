@@ -1,5 +1,5 @@
 ﻿// メイン処理の版数。CtrlViewModel.cs と一致させること。
-// #define MODE_V1
+#define MODE_V1
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -162,26 +162,6 @@ namespace WpfApp.ViewModels
         #region プロパティ
 
         /// <summary>
-        /// <see cref="Title"/>
-        /// </summary>
-        private string title = Common.TITLE;
-        /// <summary>
-        /// タイトル
-        /// </summary>
-        public string Title
-        {
-            get => title;
-            set
-            {
-                if (value != title)
-                {
-                    title = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        /// <summary>
         /// <see cref="Status"/>
         /// </summary>
         /// @note ステータスは[(ステータス,ツールチップ),領域数]の構成。ビューと一致させること。
@@ -198,28 +178,6 @@ namespace WpfApp.ViewModels
                 {
                     status = value;
                     OnPropertyChanged();
-                }
-            }
-        }
-
-        /// <summary>
-        /// <see cref="IsBusy"/>
-        /// </summary>
-        private bool isBusy = false;
-        /// <summary>
-        /// 処理中フラグ
-        /// </summary>
-        private bool IsBusy
-        {
-            get => isBusy;
-            set
-            {
-                if (value != isBusy)
-                {
-                    isBusy = value;
-                    // 開始と選択の同時起動を抑止
-                    StartCommand.RaiseCanExecuteChanged();
-                    SelectCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -345,13 +303,11 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand StartCommand => startCommand ?? (startCommand = new DelegateCommand(_ =>
         {
-            IsBusy = true;
             Master.GameStart();
-            IsBusy = false;
         },
         _ =>
         {
-            return !IsBusy;
+            return true;
         }));
 
         /// <summary>
@@ -363,13 +319,11 @@ namespace WpfApp.ViewModels
         /// </summary>
         public DelegateCommand SelectCommand => selectCommand ?? (selectCommand = new DelegateCommand(param =>
         {
-            IsBusy = true;
             Master.GameSelectPos((int)param);
-            IsBusy = false;
         },
         _ =>
         {
-            return !IsBusy;
+            return true;
         }));
 
         #endregion
@@ -490,6 +444,7 @@ namespace WpfApp.ViewModels
             var sb = Common.StatusString[p.Status.StatusB];
             var sw = Common.StatusString[p.Status.StatusW];
             status[0] = sb.Equals("") ? ("○：" + sw) : sw.Equals("") ? ("●：" + sb) : ("●：" + sb + "／○：" + sw);
+            status[1] = string.Join(",", p.Status.Record);
             status[2] = "●：" + p.Status.CountB;
             status[3] = Master.PlayerB.Name;
             status[4] = "○：" + p.Status.CountW;

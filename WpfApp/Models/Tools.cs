@@ -32,7 +32,7 @@ namespace WpfApp.Models
 
             if (bit == 0)
             {
-                return 64;
+                return -1;
             }
             bit &= (ulong)-(long)bit;
 

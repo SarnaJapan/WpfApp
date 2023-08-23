@@ -131,7 +131,6 @@ namespace WpfApp.Models
                         // 戦略が手動または計算不可ならクリック位置を選択
                         CalcTask = (Turn == Common.BLACK) ? Task.Run(() => PlayerB.Calc(Turn, data)) : Task.Run(() => PlayerW.Calc(Turn, data));
                         var p = await CalcTask;
-                        // var p = (Turn == Common.BLACK) ? PlayerB.Calc(Turn, data) : PlayerW.Calc(Turn, data);
                         if (p < 0)
                         {
                             p = pos;
@@ -253,7 +252,7 @@ namespace WpfApp.Models
             {
                 for (int i = 0; i < back.Length; i++)
                 {
-                    back[i] = ToolsV1.GetFlip(Turn, data, i).Count > 0;
+                    back[i] = ToolsV1.GetFlip(Turn, Data, i).Count > 0;
                 }
                 Back = back;
             }
@@ -322,7 +321,6 @@ namespace WpfApp.Models
                     ScoreTask = Task.Run(() => PlayerE.Score(SaveTurn, SaveData));
                     score = await ScoreTask;
                 }
-                // var score = PlayerE.Score(Turn, data);
                 if (score?.Length == Common.SIZE * Common.SIZE)
                 {
                     // インデックスと評価値を設定
@@ -373,43 +371,37 @@ namespace WpfApp.Models
                     case Common.STATUS_INIT:
                         // 履歴初期化
                         status.Record.Clear();
-                        status.CountB = data.Count(i => i == Common.BLACK);
-                        status.CountW = data.Count(i => i == Common.WHITE);
-                        // 戦略種別確認
-                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
-                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
+                        status.CountB = Data.Count(i => i == Common.BLACK);
+                        status.CountW = Data.Count(i => i == Common.WHITE);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_CTRL:
-                        // 戦略種別確認
-                        status.ManualB = PlayerB.Version.EndsWith(Common.OPTION_NOMATCH);
-                        status.ManualW = PlayerW.Version.EndsWith(Common.OPTION_NOMATCH);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_NEXT:
                         // 履歴更新
                         status.Record.Add(pos);
-                        status.CountB = data.Count(i => i == Common.BLACK);
-                        status.CountW = data.Count(i => i == Common.WHITE);
+                        status.CountB = Data.Count(i => i == Common.BLACK);
+                        status.CountW = Data.Count(i => i == Common.WHITE);
                         // 戦略種別を基にステータス文字列を設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? Common.STATUS_WAIT : Common.STATUS_NEXT) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_RESULT:
                         // 結果を基にステータス文字列を設定
-                        status.CountB = data.Count(i => i == Common.BLACK);
-                        status.CountW = data.Count(i => i == Common.WHITE);
+                        status.CountB = Data.Count(i => i == Common.BLACK);
+                        status.CountW = Data.Count(i => i == Common.WHITE);
                         status.StatusB = (status.CountB > status.CountW) ? Common.STATUS_WIN : (status.CountB < status.CountW) ? Common.STATUS_LOSE : Common.STATUS_DRAW;
                         status.StatusW = (status.CountB < status.CountW) ? Common.STATUS_WIN : (status.CountB > status.CountW) ? Common.STATUS_LOSE : Common.STATUS_DRAW;
                         break;
                     case Common.STATUS_CALC:
                         // ステータス文字列のみ設定
-                        status.StatusB = (Turn == Common.BLACK) ? (status.ManualB ? status.StatusB : Common.STATUS_CALC) : Common.STATUS_EMPTY;
-                        status.StatusW = (Turn == Common.WHITE) ? (status.ManualW ? status.StatusW : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        status.StatusB = (Turn == Common.BLACK) ? (Common.IsManual(PlayerB.Version) ? status.StatusB : Common.STATUS_CALC) : Common.STATUS_EMPTY;
+                        status.StatusW = (Turn == Common.WHITE) ? (Common.IsManual(PlayerW.Version) ? status.StatusW : Common.STATUS_CALC) : Common.STATUS_EMPTY;
                         break;
                     case Common.STATUS_PASS:
                         // ステータス文字列のみ設定
