@@ -1,5 +1,5 @@
 ﻿// メイン処理の版数。CtrlViewModel.cs と一致させること。
-#define MODE_V1
+// #define MODE_V1
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
