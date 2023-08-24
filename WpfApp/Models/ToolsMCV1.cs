@@ -11,7 +11,7 @@ namespace WpfApp.Models
         /// <summary>
         /// デフォルトプレイアウト回数
         /// </summary>
-        public static int DEFAULT_COUNT = 1024;
+        public const int DEFAULT_COUNT = 1024;
 
         #region 原始モンテカルロ
 

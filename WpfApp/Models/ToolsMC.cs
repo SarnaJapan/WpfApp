@@ -11,12 +11,12 @@ namespace WpfApp.Models
         /// <summary>
         /// デフォルトプレイアウト回数
         /// </summary>
-        public static int DEFAULT_COUNT = 1024;
+        public const int DEFAULT_COUNT = 1024;
 
         /// <summary>
         /// デフォルトMCTSパラメータ
         /// </summary>
-        public static double DEFAULT_PARAM = 0.3;
+        public const double DEFAULT_PARAM = 0.3;
 
         #region 原始モンテカルロ
 
@@ -104,7 +104,7 @@ namespace WpfApp.Models
         /// <summary>
         /// 探索木
         /// </summary>
-        private class TreeNode
+        private sealed class TreeNode
         {
             // 子ノード
             public List<TreeNode> children = new List<TreeNode>();

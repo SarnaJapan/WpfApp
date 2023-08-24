@@ -27,11 +27,6 @@ namespace WpfApp.Models
         /// @}
 
         /// <summary>
-        /// タイトル
-        /// </summary>
-        public const string TITLE = "WPF Othello";
-
-        /// <summary>
         /// BitBoard版初期値：黒
         /// </summary>
         public const ulong BB_BLACK = 0x0000000810000000;
@@ -63,6 +58,26 @@ namespace WpfApp.Models
         public const string OPTION_NOEVAL = "/NoEval";
 
         /// @}
+
+        /// <summary>
+        /// 手動プレイヤー判断
+        /// </summary>
+        /// <param name="version">バージョン文字列</param>
+        /// <returns>結果</returns>
+        public static bool IsManual(string version)
+        {
+            return version.EndsWith(OPTION_NOMATCH);
+        }
+
+        /// <summary>
+        /// ランダム戦略プレイヤー判断
+        /// </summary>
+        /// <param name="version">バージョン文字列</param>
+        /// <returns>結果</returns>
+        public static bool IsRandom(string version)
+        {
+            return version.EndsWith(OPTION_NOEVAL);
+        }
 
         /// @name ステータス種別
         /// @{
@@ -127,7 +142,7 @@ namespace WpfApp.Models
         /// Board<<=Master    [label="StatusPropertyChanged(STATUS_RESULT)"];
         /// MainWindow<-Board [label="Status@binding(STATUS_WIN/STATUS_LOSE/STATUS_DRAW)"];
         /// @endmsc
-        public static Dictionary<int, string> StatusString = new Dictionary<int, string>()
+        public static readonly Dictionary<int, string> StatusString = new Dictionary<int, string>()
         {
             {STATUS_EMPTY, ""},
             {STATUS_WIN,   "勝ち"},
@@ -363,16 +378,6 @@ namespace WpfApp.Models
         /// 石数：白
         /// </summary>
         public int CountW { get; set; } = 0;
-
-        /// <summary>
-        /// 手動戦略フラグ：黒
-        /// </summary>
-        public bool ManualB { get; set; } = true;
-
-        /// <summary>
-        /// 手動戦略フラグ：白
-        /// </summary>
-        public bool ManualW { get; set; } = true;
 
         /// <summary>
         /// ステータス種別：黒

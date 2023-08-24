@@ -1,5 +1,5 @@
 ﻿// メイン処理の版数。MainViewModel.cs と一致させること。
-// #define MODE_V1
+#define MODE_V1
 
 using System.Collections.Generic;
 using System.Linq;
@@ -43,21 +43,21 @@ namespace WpfApp.ViewModels
             Master = master;
 
             // 評価プレイヤー選択肢設定
-            EvalMap = Master.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOEVAL));
+            EvalMap = Master.PlayerMap.Where(p => !Common.IsRandom(p.Value.Version));
 
             // 対戦プレイヤー選択肢設定
 #if MODE_V1
             // 旧版（ゲームマスターに登録済みのプレイヤーリストを取得）
-            MatchMapV1 = Master.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            MatchMapV1 = Master.PlayerMap.Where(p => !Common.IsManual(p.Value.Version));
             // BitBoard版（メイン処理の版数と異なるため新規プレイヤーリストを取得）
             var gm = new Master();
-            MatchMap = gm.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            MatchMap = gm.PlayerMap.Where(p => !Common.IsManual(p.Value.Version));
 #else
             // 旧版（メイン処理の版数と異なるため新規プレイヤーリストを取得）
             var gmv1 = new MasterV1();
-            MatchMapV1 = gmv1.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            MatchMapV1 = gmv1.PlayerMap.Where(p => !Common.IsManual(p.Value.Version));
             // BitBoard版（ゲームマスターに登録済みのプレイヤーリストを取得）
-            MatchMap = Master.PlayerMap.Where(p => !p.Value.Version.EndsWith(Common.OPTION_NOMATCH));
+            MatchMap = Master.PlayerMap.Where(p => !Common.IsManual(p.Value.Version));
 #endif
             // 登録済先頭プレイヤー選択
             MatchPBV1 = MatchMapV1.First().Value;
@@ -339,6 +339,30 @@ namespace WpfApp.ViewModels
         }
 
         /// <summary>
+        /// 非同期実行
+        /// </summary>
+        /// <param name="func">処理</param>
+        /// <param name="param">パラメータ</param>
+        private async void AsyncCall(System.Func<System.IProgress<string>, CancellationToken, object[], string> func, object[] param)
+        {
+            IsBusy = true;
+            CancelTokenSource = new CancellationTokenSource();
+            Status = "開始";
+            var progress = new System.Progress<string>(i =>
+            {
+                Status = $"実行中… [{i}]";
+            });
+            var res = await Task.Run(() =>
+            {
+                return func(progress, CancelTokenSource.Token, param);
+            });
+            Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
+            CancelTokenSource.Dispose();
+            CancelTokenSource = null;
+            IsBusy = false;
+        }
+
+        /// <summary>
         /// 非同期対戦
         /// </summary>
         /// <param name="func">処理</param>
@@ -357,6 +381,33 @@ namespace WpfApp.ViewModels
             var res = await Task.Run(() =>
             {
                 return func(progress, CancelTokenSource.Token, pb, pw, count);
+            });
+            Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
+            CancelTokenSource.Dispose();
+            CancelTokenSource = null;
+            IsBusy = false;
+        }
+
+        /// <summary>
+        /// 非同期対戦
+        /// </summary>
+        /// <param name="func">処理</param>
+        /// <param name="pb">プレイヤー：黒</param>
+        /// <param name="pw">プレイヤー：白</param>
+        /// <param name="count">対戦回数</param>
+        /// <param name="param">パラメータ</param>
+        private async void AsyncCall<T>(System.Func<System.IProgress<string>, CancellationToken, T, T, int, string, string> func, T pb, T pw, int count, string param)
+        {
+            IsBusy = true;
+            CancelTokenSource = new CancellationTokenSource();
+            Status = "開始";
+            var progress = new System.Progress<string>(i =>
+            {
+                Status = $"対戦中… [{i}]";
+            });
+            var res = await Task.Run(() =>
+            {
+                return func(progress, CancelTokenSource.Token, pb, pw, count, param);
             });
             Status = CancelTokenSource.IsCancellationRequested ? $"中断 [{res}]" : $"終了 [{res}]";
             CancelTokenSource.Dispose();
