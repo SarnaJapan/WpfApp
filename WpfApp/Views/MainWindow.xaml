@@ -143,7 +143,7 @@
                             <TextBlock Margin="4,30,4,0" Foreground="{Binding [4]}" Text="{Binding [5]}" />
                             <TextBlock Margin="4,45,4,0" Foreground="{Binding [6]}" Text="{Binding [7]}" />
                             <!-- 個々のアイテム(Stone)ではなく、親(Window)のデータコンテキスト(Board)を指定する。 -->
-                            <Button Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}, Mode=FindAncestor}}" Style="{StaticResource GridButtonStyle}">
+                            <Button Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}" Style="{StaticResource GridButtonStyle}">
                                 <Button.CommandParameter>
                                     <MultiBinding Converter="{StaticResource PositionConverter}">
                                         <Binding Path="ColumnIndex" />
